@@ -42,8 +42,12 @@ serve(async (req) => {
                       req.headers.get('signature');
 
     if (!signature) {
-      console.error("Missing PocketFi signature header. Received headers:", Object.fromEntries(req.headers.entries()));
-      return new Response(JSON.stringify({ error: 'Missing PocketFi signature header' }), { status: 401 })
+      const allHeaders = Object.fromEntries(req.headers.entries());
+      console.error("Missing PocketFi signature header. Received headers:", allHeaders);
+      return new Response(JSON.stringify({ 
+        error: 'Missing PocketFi signature header',
+        received_headers: allHeaders 
+      }), { status: 401 })
     }
 
     const secret = Deno.env.get('POCKETFI_SECRET_KEY') || '1c85ecfb4714c1a3aa40e51eb1630a3c155ac3a53ef03d2f188379af677a120c'
