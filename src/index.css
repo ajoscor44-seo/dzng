@@ -1,6 +1,6 @@
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Lato', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Antic Slab', Georgia, serif;
 
   /* Color Palette - Premium Cyber Dark */
   --bg-main: #06040b;
