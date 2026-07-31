@@ -683,10 +683,12 @@ const OrderHistory = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Order Description</span>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: '600', textAlign: 'right' }}>{selectedOrder.method}</span>
-                </div>
+                {selectedOrder.type !== 'Social Log' && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Order Description</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: '600', textAlign: 'right' }}>{selectedOrder.method}</span>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Created Date</span>
@@ -834,21 +836,42 @@ const OrderHistory = () => {
                     )}
                     {selectedOrder.raw.account_details && (() => {
                       const details = selectedOrder.raw.account_details;
-                      const renderKV = (obj) => Object.entries(obj).filter(([k]) => !['raw_response', 'status', 'item_number'].includes(k)).map(([key, value]) => (
-                        <div key={key} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                          <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '13px', wordBreak: 'break-all', textAlign: 'right', maxWidth: '200px' }}>{String(value || 'N/A')}</code>
-                            <button 
-                              onClick={() => { navigator.clipboard.writeText(String(value || '')); }}
-                              style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0 }}
-                              title={`Copy ${key}`}
-                            >
-                              <Copy size={12} />
-                            </button>
+                      const renderKV = (obj) => Object.entries(obj).filter(([k]) => !['raw_response', 'status', 'item_number'].includes(k)).map(([key, value]) => {
+                        const valStr = String(value || 'N/A');
+                        const isLong = valStr.length > 25 || valStr.includes('|') || valStr.includes(':');
+                        if (isLong) {
+                          return (
+                            <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                              <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize', fontSize: '12px' }}>{key.replace(/_/g, ' ')}</span>
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '12px', wordBreak: 'break-all', flex: 1, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{valStr}</code>
+                                <button 
+                                  onClick={() => { navigator.clipboard.writeText(valStr); }}
+                                  style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0, padding: 0, marginTop: '2px' }}
+                                  title={`Copy ${key}`}
+                                >
+                                  <Copy size={13} />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                            <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '13px', wordBreak: 'break-all', textAlign: 'right', maxWidth: '200px' }}>{valStr}</code>
+                              <button 
+                                onClick={() => { navigator.clipboard.writeText(valStr); }}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0 }}
+                                title={`Copy ${key}`}
+                              >
+                                <Copy size={12} />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ));
+                        );
+                      });
                       if (Array.isArray(details)) {
                         return details.map((item, idx) => (
                           <div key={idx}>

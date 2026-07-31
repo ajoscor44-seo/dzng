@@ -29,7 +29,6 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const menuItems = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'subs', label: 'Premium Accounts', icon: User, external: true, url: 'https://www.discountzar.com/marketplace' },
     { id: 'otp', label: 'SMS OTP (Temp)', icon: Key },
     { id: 'social', label: 'Social Media Logs', icon: ShieldCheck },
     { id: 'reuse', label: 'Reuse Number', icon: RefreshCw },
