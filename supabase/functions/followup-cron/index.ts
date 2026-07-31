@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.6";
 // Ensure required env vars are set
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
+const SENDBYTE_API_KEY = Deno.env.get("SENDBYTE_API_KEY") || Deno.env.get("RESEND_API_KEY") || "";
 const SENDER_EMAIL = Deno.env.get("SENDER_EMAIL") || "support@discountzar.com";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -98,11 +98,11 @@ serve(async (req) => {
 
       console.log(`Sending follow-up email to ${email}`);
 
-      // 4. Send Email via Resend
-      const resendReq = await fetch("https://api.resend.com/emails", {
+      // 4. Send Email via SendByte
+      const sendbyteReq = await fetch("https://api.sendbyte.africa/v1/emails", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Authorization": `Bearer ${SENDBYTE_API_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -113,9 +113,9 @@ serve(async (req) => {
         })
       });
 
-      if (!resendReq.ok) {
-        const errorText = await resendReq.text();
-        console.error("Resend API Error:", errorText);
+      if (!sendbyteReq.ok) {
+        const errorText = await sendbyteReq.text();
+        console.error("SendByte API Error:", errorText);
         continue;
       }
 

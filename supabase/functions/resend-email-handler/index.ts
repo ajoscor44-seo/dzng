@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const SENDER_EMAIL = "support@discountzar.ng"; // verified domain on Resend
+const SENDBYTE_API_KEY = Deno.env.get("SENDBYTE_API_KEY") || Deno.env.get("RESEND_API_KEY") || "";
+const SENDER_EMAIL = "support@discountzar.ng"; // verified domain on SendByte
 
 // Supabase client (Service Role for admin DB access)
 const supabase = createClient(
@@ -219,6 +219,36 @@ const generatePurchaseReceiptEmail = (method: string, amount: any, txId: string)
 </div>
 `;
 
+const generateRefundEmail = (amount: any, method: string, reference: string) => `
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h1 style="color: #00f2fe; margin: 0; font-size: 24px;">Wallet Refunded Successfully 🔄</h1>
+  </div>
+  <p style="font-size: 16px; color: #e2e8f0;">A refund has been credited back to your DiscountZar wallet.</p>
+  
+  <div style="background: rgba(0, 242, 254, 0.05); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(0, 242, 254, 0.15);">
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Refund Amount:</td>
+        <td style="padding: 8px 0; color: #00f2fe; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">₦${Number(amount).toLocaleString()}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Reason / Service:</td>
+        <td style="padding: 8px 0; color: #fff; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1);">${method}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #94a3b8;">Transaction Reference:</td>
+        <td style="padding: 8px 0; color: #94a3b8; text-align: right; font-family: monospace;">${reference}</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #00c6ff 0%, #00f2fe 100%); color: #000; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+  </div>
+</div>
+`;
+
 const formatDetailsForEmail = (details: any): string => {
   if (!details) return "";
   
@@ -334,16 +364,17 @@ serve(async (req) => {
         if (profile && profile.email) {
           recipientEmail = profile.email;
           
-          if (record.type === "Deposit") {
+          const isRefund = record.method?.toLowerCase().includes("refund") || record.type === "Refund";
+          
+          if (record.type === "Deposit" && !isRefund) {
             // Funding Email
             emailSubject = "Wallet Funded Successfully - DiscountZar";
             emailHtml = generateFundingEmail(record.amount, record.id);
 
-            // Also notify admins if this is a real deposit (not a refund or welcome bonus)
-            const isRefund = record.method?.toLowerCase().includes("refund");
+            // Also notify admins if this is a real deposit (not a welcome bonus)
             const isBonus = record.method?.toLowerCase().includes("bonus");
 
-            if (!isRefund && !isBonus) {
+            if (!isBonus) {
               try {
                 // Fetch admins
                 const { data: admins } = await supabase
@@ -357,10 +388,10 @@ serve(async (req) => {
                   console.log("Notifying admins of deposit:", adminEmails);
                   const adminEmailHtml = generateAdminFundingEmail(profile, record.amount, record.method, record.id);
 
-                  await fetch("https://api.resend.com/emails", {
+                  await fetch("https://api.sendbyte.africa/v1/emails", {
                     method: "POST",
                     headers: {
-                      "Authorization": `Bearer ${RESEND_API_KEY}`,
+                      "Authorization": `Bearer ${SENDBYTE_API_KEY}`,
                       "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
@@ -375,6 +406,10 @@ serve(async (req) => {
                 console.error("Failed to notify admins of deposit:", adminErr);
               }
             }
+          } else if (record.type === "Refund" || (record.type === "Deposit" && isRefund)) {
+            // Refund Email
+            emailSubject = "Refund Credited Successfully - DiscountZar";
+            emailHtml = generateRefundEmail(record.amount, record.method, record.id);
           } else if (record.type === "Purchase") {
             // Purchase Receipt Email
             emailSubject = "Purchase Receipt - DiscountZar";
@@ -426,14 +461,14 @@ serve(async (req) => {
       }
     }
 
-    // Dispatch the email via Resend if we have a recipient and HTML content
+    // Dispatch the email via SendByte if we have a recipient and HTML content
     if (recipientEmail && emailHtml) {
       console.log(`Sending email to ${recipientEmail} for event on table ${table}...`);
       
-      const resendReq = await fetch("https://api.resend.com/emails", {
+      const sendbyteReq = await fetch("https://api.sendbyte.africa/v1/emails", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Authorization": `Bearer ${SENDBYTE_API_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -444,14 +479,14 @@ serve(async (req) => {
         })
       });
 
-      const resendRes = await resendReq.json();
+      const sendbyteRes = await sendbyteReq.json();
       
-      if (!resendReq.ok) {
-        console.error("Resend API Error:", resendRes);
-        throw new Error(`Resend Error: ${resendRes.message}`);
+      if (!sendbyteReq.ok) {
+        console.error("SendByte API Error:", sendbyteRes);
+        throw new Error(`SendByte Error: ${sendbyteRes.message}`);
       }
 
-      return new Response(JSON.stringify({ success: true, message: "Email dispatched", resend_id: resendRes.id }), {
+      return new Response(JSON.stringify({ success: true, message: "Email dispatched", resend_id: sendbyteRes.id }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
