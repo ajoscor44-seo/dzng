@@ -51,7 +51,8 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
   const getFallbackImage = (cat, name) => {
     const c = cat?.toLowerCase() || '';
     const n = name?.toLowerCase() || '';
-    if (c.includes('facebook') || c.includes('fb')) return facebookLogo;
+    
+    // Local overrides
     if (c.includes('netflix')) return netflixLogo;
     if (c.includes('spotify')) return spotifyLogo;
     if (c.includes('youtube') || c.includes('yt')) return youtubeLogo;
@@ -61,18 +62,83 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('whatsapp') || c.includes('wa')) return whatsappLogo;
     if (c.includes('twitter') || c.includes('x')) return xLogo;
     if (c.includes('apple')) return appleLogo;
+
+    // Premium brand SVGs from online Simple Icons CDN
+    const simpleIconsMap = [
+      { key: 'facebook', slug: 'facebook', bg: '1877F2' },
+      { key: 'instagram', slug: 'instagram', bg: 'E1306C' },
+      { key: 'tiktok', slug: 'tiktok', bg: '010101' },
+      { key: 'telegram', slug: 'telegram', bg: '0088cc' },
+      { key: 'whatsapp', slug: 'whatsapp', bg: '25D366' },
+      { key: 'snapchat', slug: 'snapchat', bg: 'FFFC00', color: '000' },
+      { key: 'linkedin', slug: 'linkedin', bg: '0A66C2' },
+      { key: 'gmail', slug: 'gmail', bg: 'EA4335' },
+      { key: 'google', slug: 'google', bg: '4285F4' },
+      { key: 'outlook', slug: 'microsoftoutlook', bg: '0078D4' },
+      { key: 'yahoo', slug: 'yahoo', bg: '6001d2' },
+      { key: 'apple', slug: 'apple', bg: '000000' },
+      { key: 'discord', slug: 'discord', bg: '5865F2' },
+      { key: 'github', slug: 'github', bg: '181717' },
+      { key: 'twitch', slug: 'twitch', bg: '9146FF' },
+      { key: 'amazon', slug: 'amazon', bg: 'FF9900', color: '000' },
+      { key: 'binance', slug: 'binance', bg: 'F0B90B', color: '000' },
+      { key: 'cashapp', slug: 'cashapp', bg: '00D632' },
+      { key: 'trustpilot', slug: 'trustpilot', bg: '00B67A' },
+      { key: 'yelp', slug: 'yelp', bg: 'D32323' },
+      { key: 'steam', slug: 'steam', bg: '171a21' },
+      { key: 'playstation', slug: 'playstation', bg: '003087' },
+      { key: 'etsy', slug: 'etsy', bg: 'F56400' },
+      { key: 'threads', slug: 'threads', bg: '000000' },
+      { key: 'bluesky', slug: 'bluesky', bg: '0085ff' },
+      { key: 'bumble', slug: 'bumble', bg: 'FFCB37', color: '000' },
+      { key: 'reddit', slug: 'reddit', bg: 'FF4500' },
+      { key: 'roblox', slug: 'roblox', bg: '000000' },
+      { key: 'badoo', slug: 'badoo', bg: '7C50F6' },
+      { key: 'proton', slug: 'protonmail', bg: '6d4aff' },
+      { key: 'quora', slug: 'quora', bg: 'B92B27' },
+      { key: 'tumblr', slug: 'tumblr', bg: '36465D' },
+      { key: 'yandex', slug: 'yandex', bg: 'FC3F1D' },
+      { key: 'zoho', slug: 'zoho', bg: '002D62' },
+      { key: 'craigslist', slug: 'craigslist', bg: '5C0099' },
+      { key: 'windows', slug: 'windows', bg: '0078D6' }
+    ];
+
+    const match = simpleIconsMap.find(item => c.includes(item.key) || n.includes(item.key));
+    if (match) {
+      const textColor = match.color || 'fff';
+      return `https://cdn.simpleicons.org/${match.slug}/${textColor}/${match.bg}`;
+    }
+
     return null;
   };
 
   const fallbackImg = getFallbackImage(category, alt);
 
   if (fallbackImg) {
+    const isOnlineSvg = typeof fallbackImg === 'string' && fallbackImg.includes('simpleicons.org');
+    const parts = isOnlineSvg ? fallbackImg.split('/') : [];
+    const bgColorHex = isOnlineSvg && parts.length > 0 ? `#${parts[parts.length - 1]}` : 'transparent';
+
     return (
-      <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
+      <div style={{ 
+        width: '100%', 
+        height, 
+        borderRadius, 
+        overflow: 'hidden', 
+        marginBottom: '12px', 
+        background: isOnlineSvg ? bgColorHex : 'rgba(255,255,255,0.02)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
         <img 
           src={fallbackImg} 
           alt={alt} 
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          style={{ 
+            width: isOnlineSvg ? '50%' : '100%', 
+            height: isOnlineSvg ? '50%' : '100%', 
+            objectFit: isOnlineSvg ? 'contain' : 'cover' 
+          }} 
         />
       </div>
     );
