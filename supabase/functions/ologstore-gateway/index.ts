@@ -1,20 +1,18 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.42.0";
 
-const OLOGSTORE_API_KEY = Deno.env.get("OLOGSTORE_API_KEY") || "";
-const OLOGSTORE_API_SECRET = Deno.env.get("OLOGSTORE_API_SECRET") || "";
-const OLOGSTORE_BASE_URL = "https://ologstore.com/api/v1";
+const ACCSBULK_API_KEY = Deno.env.get("ACCSBULK_API_KEY") || "acb_nTOOqP9wIfiRFIoYpyDShdtJvNpsRrIRPPgUPBnJFwS6JCSe";
+const ACCSBULK_BASE_URL = "https://accsbulk.com/api/v1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Helper to translate common Vietnamese terms to English
+// Helper to translate common terms to English
 const translateToEnglish = (text: string) => {
   if (!text) return text;
   
-  // Clean up unicode characters and normalize
   let result = text.normalize("NFC");
   
   const map: Record<string, string> = {
@@ -148,33 +146,49 @@ const translateToEnglish = (text: string) => {
   return result;
 };
 
-// Helper to parse delivery items (strings like "Account: user@mail.com | Pass: abc123") into structured objects
-const parseDeliveryItem = (itemStr: string): Record<string, string> => {
+// Helper to parse delivery items (like email:password or pipe separated structures) into structured objects
+const parseAccsbulkAccount = (accountStr: string): Record<string, string> => {
   const parts: Record<string, string> = {};
-  if (!itemStr) return parts;
-  const segments = itemStr.split('|');
-  segments.forEach((seg: string) => {
-    const colonIdx = seg.indexOf(':');
-    if (colonIdx > 0) {
-      let key = seg.substring(0, colonIdx).trim();
-      const val = seg.substring(colonIdx + 1).trim();
-      if (key && val) {
-        const lowerKey = key.toLowerCase();
-        if (lowerKey === 'tài khoản' || lowerKey === 'tai khoan' || lowerKey === 'username' || lowerKey === 'user' || lowerKey === 'login') {
-          key = 'Username/Email';
-        } else if (lowerKey === 'mật khẩu' || lowerKey === 'mat khau' || lowerKey === 'pass') {
-          key = 'Password';
-        } else if (lowerKey === 'mã bảo mật' || lowerKey === '2fa' || lowerKey === 'code' || lowerKey === 'mã 2fa') {
-          key = '2FA Backup Key';
-        } else {
-          key = translateToEnglish(key);
+  if (!accountStr) return parts;
+
+  // Try parsing by pipe | first (fallback support for mixed formatting)
+  if (accountStr.includes('|')) {
+    const segments = accountStr.split('|');
+    segments.forEach((seg: string) => {
+      const colonIdx = seg.indexOf(':');
+      if (colonIdx > 0) {
+        let key = seg.substring(0, colonIdx).trim();
+        const val = seg.substring(colonIdx + 1).trim();
+        if (key && val) {
+          const lowerKey = key.toLowerCase();
+          if (lowerKey === 'tài khoản' || lowerKey === 'tai khoan' || lowerKey === 'username' || lowerKey === 'user' || lowerKey === 'login') {
+            key = 'Username/Email';
+          } else if (lowerKey === 'mật khẩu' || lowerKey === 'mat khau' || lowerKey === 'pass') {
+            key = 'Password';
+          } else if (lowerKey === 'mã bảo mật' || lowerKey === '2fa' || lowerKey === 'code' || lowerKey === 'mã 2fa') {
+            key = '2FA Backup Key';
+          } else {
+            key = translateToEnglish(key);
+          }
+          parts[key] = val;
         }
-        parts[key] = val;
       }
+    });
+    if (Object.keys(parts).length > 0) {
+      return parts;
     }
-  });
-  if (Object.keys(parts).length === 0 && itemStr.trim()) {
-    parts['Details'] = translateToEnglish(itemStr.trim());
+  }
+
+  // Split by colon :
+  const segments = accountStr.split(':');
+  if (segments.length >= 2) {
+    parts['Username/Email'] = segments[0].trim();
+    parts['Password'] = segments[1].trim();
+    if (segments.length > 2) {
+      parts['Additional Info / 2FA'] = segments.slice(2).map(s => s.trim()).join(' : ');
+    }
+  } else {
+    parts['Details'] = accountStr.trim();
   }
   return parts;
 };
@@ -200,56 +214,84 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Get the user making the request
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
-
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     const { action, payload } = await req.json();
+
+    let user: any = null;
+    if (action === "buy" || action === "status") {
+      // Get the user making the request
+      const {
+        data: { user: authUser },
+        error: userError,
+      } = await supabaseClient.auth.getUser();
+
+      if (userError || !authUser) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      user = authUser;
+    }
 
     if (action === "products") {
       let products = [];
       try {
-        if (!OLOGSTORE_API_KEY) throw new Error("No API Key");
+        if (!ACCSBULK_API_KEY) throw new Error("No API Key");
 
-        const response = await fetch(`${OLOGSTORE_BASE_URL}/products/list?page=1&limit=100`, {
+        // 1. Fetch categories to get category image mapping
+        const catResponse = await fetch(`${ACCSBULK_BASE_URL}/categories`, {
           method: "GET",
           headers: {
-            "X-API-Key": OLOGSTORE_API_KEY,
-            "X-API-Secret": OLOGSTORE_API_SECRET,
+            "X-API-Key": ACCSBULK_API_KEY,
+          },
+        });
+        
+        const catImageMap: Record<number, string> = {};
+        if (catResponse.ok) {
+          const catData = await catResponse.json();
+          if (catData.success && Array.isArray(catData.data)) {
+            catData.data.forEach((cat: any) => {
+              if (cat.id && cat.image) {
+                catImageMap[cat.id] = cat.image;
+              }
+            });
+          }
+        }
+
+        // 2. Fetch listings (first page, up to 100 items)
+        const response = await fetch(`${ACCSBULK_BASE_URL}/listings?per_page=100`, {
+          method: "GET",
+          headers: {
+            "X-API-Key": ACCSBULK_API_KEY,
           },
         });
         
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.data && data.data.products) {
-            // Map OlogStore format to our frontend format
-            products = data.data.products.flatMap((p: any) => 
-              (p.plans || []).map((plan: any) => ({
-                id: plan.id,
-                category: translateToEnglish(p.category?.name || "General"),
-                name: translateToEnglish(`${p.name} - ${plan.name}`),
+          if (data.success && Array.isArray(data.data)) {
+            // Map AccsBulk format to our frontend format
+            products = data.data.map((p: any) => {
+              const categoryImage = (catImageMap[p.category?.id] || p.category?.image || "").replace(/ /g, "%20");
+              const previewUrl = `https://accsbulk.com/listings/${p.slug}`;
+
+              return {
+                id: p.id,
+                category: translateToEnglish(p.category?.title || "General"),
+                name: translateToEnglish(p.title),
                 slug: p.slug,
-                image: p.image,
-                price: Number(plan.final_price) || 0,
-                stock: plan.stock_count || 0,
-                description: translateToEnglish(p.description || "")
-              }))
-            );
+                image: categoryImage,
+                price: (Number(p.price) || 0) * 25400, // Convert USD to virtual VND base for client conversion
+                stock: p.available_stock || 0,
+                description: translateToEnglish(p.title),
+                preview: previewUrl
+              };
+            });
           }
         } else {
-          throw new Error("Failed to fetch products");
+          throw new Error("Failed to fetch products from AccsBulk");
         }
       } catch (err) {
-        console.warn("Falling back to simulated products");
+        console.warn("Falling back to simulated products", err);
         products = [
           { id: 18, category: "Facebook", name: "Facebook Aged Account", price: 5000, stock: 120, description: "Aged FB account.", image: "https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" },
           { id: 19, category: "Instagram", name: "Instagram + 100 Followers", price: 2500, stock: 300, description: "Email verified.", image: "https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" }
@@ -263,12 +305,47 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
 
+    } else if (action === "product_detail") {
+      const { slug } = payload;
+      if (!slug) {
+        return new Response(JSON.stringify({ success: false, error: "Missing slug" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      try {
+        if (!ACCSBULK_API_KEY) throw new Error("No API Key");
+        const response = await fetch(`${ACCSBULK_BASE_URL}/listings/${slug}`, {
+          method: "GET",
+          headers: {
+            "X-API-Key": ACCSBULK_API_KEY,
+          },
+        });
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData.success && resData.data) {
+            const detail = {
+              description: translateToEnglish(resData.data.description || "")
+            };
+            return new Response(JSON.stringify({ success: true, detail }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+        throw new Error("Failed to fetch product details from AccsBulk");
+      } catch (err) {
+        return new Response(JSON.stringify({ success: false, error: err.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
     } else if (action === "buy") {
       const { plan_id, plan_name, quantity, cost } = payload;
 
       const { data: profile, error: profileError } = await supabaseClient
         .from("profiles")
-        .select("wallet_balance")
+        .select("wallet_balance, email")
         .eq("id", user.id)
         .single();
 
@@ -304,44 +381,36 @@ serve(async (req) => {
         type: "debit",
         description: `Purchased Social Media Log: ${plan_name} (x${quantity})`,
         status: "completed",
-        reference: `olog_${Date.now()}`
+        reference: `accsbulk_${Date.now()}`
       });
 
-      // 4. Place order with OlogStore
+      // 4. Place order with AccsBulk
       let orderResult = null;
       try {
-        const response = await fetch(`${OLOGSTORE_BASE_URL}/orders/create`, {
+        const response = await fetch(`${ACCSBULK_BASE_URL}/purchase`, {
           method: "POST",
           headers: {
-            "X-API-Key": OLOGSTORE_API_KEY,
-            "X-API-Secret": OLOGSTORE_API_SECRET,
+            "X-API-Key": ACCSBULK_API_KEY,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            items: [
-              {
-                plan_id: plan_id,
-                quantity: quantity,
-                fields: {
-                  email_dang_nhap: profile.email || "customer@discountzar.ng"
-                }
-              }
-            ]
+            ad_id: Number(plan_id),
+            quantity: Number(quantity)
           })
         });
 
         if (response.ok) {
           orderResult = await response.json();
-          console.log("OlogStore order response:", JSON.stringify(orderResult));
+          console.log("AccsBulk order response:", JSON.stringify(orderResult));
           if (orderResult && orderResult.success === false) {
-            throw new Error(orderResult.message || orderResult.error || "OlogStore order creation failed");
+            throw new Error(orderResult.message || "AccsBulk purchase failed");
           }
         } else {
-          console.error("Ologstore API Order Error:", response.status, await response.text());
-          throw new Error("OlogStore order creation failed");
+          console.error("AccsBulk API Order Error:", response.status, await response.text());
+          throw new Error("AccsBulk purchase failed");
         }
       } catch (err) {
-        console.warn("OlogStore error, refunding user:", err);
+        console.warn("AccsBulk error, refunding user:", err);
         // Refund User
         const { data: currentProfile } = await supabaseAdmin.from("profiles").select("wallet_balance").eq("id", user.id).single();
         if (currentProfile) {
@@ -354,14 +423,13 @@ serve(async (req) => {
           type: "credit",
           description: `Refund: Failed to purchase ${plan_name}`,
           status: "completed",
-          reference: `refund_olog_${Date.now()}`
+          reference: `refund_accsbulk_${Date.now()}`
         });
 
         const errMsg = err.message || '';
         let userFriendlyError = "Failed to place order with provider. You have been refunded.";
         if (
-          errMsg.toLowerCase().includes('không đủ tiền') ||
-          errMsg.toLowerCase().includes('số dư') ||
+          errMsg.toLowerCase().includes('insufficient') ||
           errMsg.toLowerCase().includes('balance') ||
           errMsg.toLowerCase().includes('money') ||
           errMsg.toLowerCase().includes('fund')
@@ -375,33 +443,21 @@ serve(async (req) => {
         });
       }
 
-      // 5. Parse the OlogStore response to extract delivery data
-      // OlogStore returns: { success, data: { orders: [{trans_id, ...}], delivery: { items: ["Account: x | Pass: y"], delivered_count, expected_count } } }
-      const ologData = orderResult?.data || {};
-      const ologOrders = ologData.orders || (ologData.order ? [ologData.order] : []);
-      const transId = (ologOrders[0]?.trans_id) || orderResult?.trans_id || null;
-      const deliveryItems = 
-        ologOrders[0]?.delivery?.items || 
-        ologData.delivery?.items || 
-        orderResult?.delivery?.items || 
-        orderResult?.data?.delivery?.items || 
-        [];
+      const purchaseData = orderResult?.data || {};
+      const transId = purchaseData.order_id || null;
+      const deliveryItems = purchaseData.accounts || [];
 
       // Build account_details as a structured object
-      const finalStatus = ologData?.status || ologOrders[0]?.status || orderResult?.status || "completed";
       let accountDetails: any;
       if (deliveryItems.length === 1) {
-        // Single item: flatten to a simple key-value object
-        accountDetails = parseDeliveryItem(deliveryItems[0]);
+        accountDetails = parseAccsbulkAccount(deliveryItems[0]);
       } else if (deliveryItems.length > 1) {
-        // Multiple items: array of parsed objects
         accountDetails = deliveryItems.map((item: string, idx: number) => ({
           item_number: idx + 1,
-          ...parseDeliveryItem(item)
+          ...parseAccsbulkAccount(item)
         }));
       } else {
-        // No delivery items yet (order may be processing) - store raw response for reference
-        accountDetails = { status: finalStatus, raw_response: ologData };
+        accountDetails = { status: "completed", raw_response: purchaseData };
       }
 
       // 6. Insert into social_media_orders table
@@ -415,9 +471,9 @@ serve(async (req) => {
           plan_name: plan_name,
           quantity: quantity,
           cost: cost,
-          status: finalStatus,
+          status: "completed",
           account_details: accountDetails,
-          ologstore_order_id: transId || `local_${Date.now()}`
+          ologstore_order_id: transId ? String(transId) : `local_${Date.now()}`
         })
         .select()
         .single();
@@ -444,56 +500,50 @@ serve(async (req) => {
         });
       }
 
-      // Query OlogStore status API
-      const response = await fetch(`${OLOGSTORE_BASE_URL}/orders/status?trans_id=${trans_id}`, {
+      // Query AccsBulk status API
+      const response = await fetch(`${ACCSBULK_BASE_URL}/orders/${trans_id}`, {
         method: "GET",
         headers: {
-          "X-API-Key": OLOGSTORE_API_KEY,
-          "X-API-Secret": OLOGSTORE_API_SECRET,
+          "X-API-Key": ACCSBULK_API_KEY,
         },
       });
 
       if (!response.ok) {
-        console.error("OlogStore status error:", response.status, await response.text());
-        return new Response(JSON.stringify({ success: false, error: "Failed to fetch status from OlogStore" }), {
+        console.error("AccsBulk status error:", response.status, await response.text());
+        return new Response(JSON.stringify({ success: false, error: "Failed to fetch status from AccsBulk" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
       const statusResult = await response.json();
-      console.log("OlogStore status query response:", JSON.stringify(statusResult));
+      console.log("AccsBulk status query response:", JSON.stringify(statusResult));
 
-      const ologData = statusResult?.data || {};
-      const ologOrders = ologData.orders || (ologData.order ? [ologData.order] : []);
-      const status = ologData?.status || ologOrders[0]?.status || statusResult?.status || "completed";
-      const deliveryItems = 
-        statusResult?.delivery?.items || 
-        ologOrders[0]?.delivery?.items || 
-        ologData.delivery?.items || 
-        statusResult?.data?.delivery?.items || 
-        [];
+      const orderData = statusResult?.data || {};
+      const deliveryItems = orderData.accounts || [];
 
       // Parse delivery items
       let accountDetails: any;
-      if (deliveryItems.length === 1) {
-        accountDetails = parseDeliveryItem(deliveryItems[0]);
-      } else if (deliveryItems.length > 1) {
-        accountDetails = deliveryItems.map((item: string, idx: number) => ({
-          item_number: idx + 1,
-          ...parseDeliveryItem(item)
-        }));
-      } else {
-        accountDetails = { status: status, raw_response: ologData };
+      if (deliveryItems && deliveryItems.length > 0) {
+        if (deliveryItems.length === 1) {
+          accountDetails = parseAccsbulkAccount(deliveryItems[0]);
+        } else {
+          accountDetails = deliveryItems.map((item: string, idx: number) => ({
+            item_number: idx + 1,
+            ...parseAccsbulkAccount(item)
+          }));
+        }
       }
 
       // Update in the database
+      const updateData: any = { status: "completed" };
+      if (accountDetails) {
+        updateData.account_details = accountDetails;
+      }
+
       const { data: updatedOrder, error: updateError } = await supabaseAdmin
         .from("social_media_orders")
-        .update({
-          status: status,
-          account_details: accountDetails
-        })
+        .update(updateData)
         .eq("ologstore_order_id", trans_id)
         .select()
         .single();

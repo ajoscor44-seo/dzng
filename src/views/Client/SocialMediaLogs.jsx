@@ -1,14 +1,107 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate, useMatch, useLocation } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { createPortal } from 'react-dom';
-import { Share2, ShoppingCart, Tag, AlertCircle, CheckCircle, Search, Shield, ChevronRight } from 'lucide-react';
+import { Share2, ShoppingCart, Tag, AlertCircle, CheckCircle, Search, Shield, ChevronRight, ExternalLink, Eye } from 'lucide-react';
 import { supabase } from '../../supabase';
+import facebookLogo from '../../assets/facebook.png';
+import chatgptLogo from '../../assets/chatgpt.jpeg';
+import claudeLogo from '../../assets/claude.jpeg';
+import netflixLogo from '../../assets/netflix.jpeg';
+import spotifyLogo from '../../assets/spotify.jpeg';
+import surfsharkLogo from '../../assets/surfshark.jpeg';
+import youtubeLogo from '../../assets/youtube.jpeg';
+
+const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8px' }) => {
+  const [error, setError] = useState(false);
+  
+  const getGradient = (cat) => {
+    const c = cat?.toLowerCase() || '';
+    if (c.includes('facebook') || c.includes('fb')) return 'linear-gradient(135deg, #1877F2 0%, #00f2fe 100%)';
+    if (c.includes('instagram') || c.includes('ig')) return 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #FCAF45 100%)';
+    if (c.includes('tiktok') || c.includes('tt')) return 'linear-gradient(135deg, #010101 0%, #EE1D52 50%, #69C9D0 100%)';
+    if (c.includes('twitter') || c.includes('x')) return 'linear-gradient(135deg, #1DA1F2 0%, #7f00ff 100%)';
+    if (c.includes('linkedin') || c.includes('link')) return 'linear-gradient(135deg, #0A66C2 0%, #00f2fe 100%)';
+    if (c.includes('gmail') || c.includes('google')) return 'linear-gradient(135deg, #EA4335 0%, #FBBC05 100%)';
+    if (c.includes('snapchat')) return 'linear-gradient(135deg, #FFFC00 0%, #f1c40f 100%)';
+    return 'linear-gradient(135deg, var(--color-violet) 0%, var(--color-pink) 100%)';
+  };
+
+  const getPlatformIcon = (cat) => {
+    const c = cat?.toLowerCase() || '';
+    if (c.includes('facebook') || c.includes('fb')) return '📘';
+    if (c.includes('instagram') || c.includes('ig')) return '📸';
+    if (c.includes('tiktok') || c.includes('tt')) return '🎵';
+    if (c.includes('twitter') || c.includes('x')) return '🐦';
+    if (c.includes('linkedin') || c.includes('link')) return '💼';
+    if (c.includes('gmail') || c.includes('google')) return '📧';
+    if (c.includes('snapchat')) return '👻';
+    return '📱';
+  };
+
+  const getFallbackImage = (cat, name) => {
+    const c = cat?.toLowerCase() || '';
+    const n = name?.toLowerCase() || '';
+    if (c.includes('facebook') || c.includes('fb')) return facebookLogo;
+    if (c.includes('netflix')) return netflixLogo;
+    if (c.includes('spotify')) return spotifyLogo;
+    if (c.includes('youtube') || c.includes('yt')) return youtubeLogo;
+    if (c.includes('surfshark')) return surfsharkLogo;
+    if (n.includes('claude')) return claudeLogo;
+    if (n.includes('chatgpt') || n.includes('gpt')) return chatgptLogo;
+    return null;
+  };
+
+  const fallbackImg = getFallbackImage(category, alt);
+
+  if (fallbackImg) {
+    return (
+      <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
+        <img 
+          src={fallbackImg} 
+          alt={alt} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
+    );
+  }
+
+  if (error || !src) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        height, 
+        borderRadius, 
+        background: getGradient(category), 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        fontSize: height === '200px' ? '48px' : '32px',
+        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
+        marginBottom: '12px',
+        opacity: 0.85
+      }}>
+        {getPlatformIcon(category)}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
+      <img 
+        src={src} 
+        alt={alt} 
+        onError={() => setError(true)} 
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+      />
+    </div>
+  );
+};
 
 const SocialMediaLogs = () => {
-  const { fetchSocialMediaLogs, buySocialMediaLog, formatCost, currency } = useContext(AppContext);
+  const { fetchSocialMediaLogs, buySocialMediaLog, formatCost, currency, fetchSocialMediaLogDetail, isLoggedIn } = useContext(AppContext);
   const isMobile = useIsMobile();
   
   const [logs, setLogs] = useState([]);
@@ -19,16 +112,48 @@ const SocialMediaLogs = () => {
   const [activeCategory, setActiveCategory] = useState('All');
   
   const navigate = useNavigate();
+  const location = useLocation();
   const buyMatch = useMatch('/dashboard/social/buy/:id');
   const selectedLogId = buyMatch?.params?.id;
   const selectedLog = selectedLogId ? logs.find(l => String(l.slug) === String(selectedLogId) || String(l.id) === String(selectedLogId)) : null;
   const [purchaseQuantity, setPurchaseQuantity] = useState(1);
   const [purchaseLoading, setPurchaseLoading] = useState(false);
   const [purchaseSuccess, setPurchaseSuccess] = useState(null);
+  const [previewModalLog, setPreviewModalLog] = useState(null);
+
+  const [detailedDescription, setDetailedDescription] = useState('');
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   useEffect(() => {
     loadLogs();
   }, []);
+
+  useEffect(() => {
+    if (selectedLogId && logs.length > 0) {
+      const log = logs.find(l => String(l.slug) === String(selectedLogId) || String(l.id) === String(selectedLogId));
+      if (log) {
+        loadLogDetail(log.slug);
+      }
+    } else {
+      setDetailedDescription('');
+    }
+  }, [selectedLogId, logs]);
+
+  const loadLogDetail = async (slug) => {
+    setDetailsLoading(true);
+    setDetailedDescription('');
+    const res = await fetchSocialMediaLogDetail(slug);
+    if (res.success) {
+      setDetailedDescription(res.description);
+    } else {
+      console.warn("Failed to load details:", res.msg);
+      const log = logs.find(l => String(l.slug) === String(slug) || String(l.id) === String(slug));
+      if (log) {
+        setDetailedDescription(log.description);
+      }
+    }
+    setDetailsLoading(false);
+  };
 
   const loadLogs = async () => {
     setLoading(true);
@@ -65,6 +190,11 @@ const SocialMediaLogs = () => {
     e.preventDefault();
     if (!selectedLog) return;
     
+    if (!isLoggedIn) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    
     setPurchaseLoading(true);
     // Cost calculation in NGN
     const totalCost = selectedLog.priceNgn * purchaseQuantity;
@@ -95,6 +225,134 @@ const SocialMediaLogs = () => {
   };
 
   if (selectedLog && buyMatch) {
+    const renderCheckoutCard = () => {
+      return purchaseSuccess ? (
+        <div className="glass-panel pulse-glow-cyan" style={{ padding: '32px 24px', textAlign: 'center', background: 'rgba(59, 183, 94, 0.05)', border: '1px solid rgba(59, 183, 94, 0.2)' }}>
+          <div style={{ width: '64px', height: '64px', background: 'rgba(59, 183, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <CheckCircle size={32} color="var(--color-green)" />
+          </div>
+          <h2 style={{ margin: '0 0 10px', fontSize: '24px' }}>Purchase Successful!</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
+            Your social media account details are ready. Please save them securely.
+          </p>
+          
+          <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px', textAlign: 'left', marginBottom: '24px' }}>
+            <h4 style={{ margin: '0 0 16px', color: '#ab47fc', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Account Credentials</h4>
+            
+            {(() => {
+              const details = purchaseSuccess.account_details;
+              if (!details || (typeof details === 'object' && Object.keys(details).length === 0)) {
+                return <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Order is being processed. Check your order history for delivery updates.</div>;
+              }
+              if (Array.isArray(details)) {
+                return details.map((item, idx) => (
+                  <div key={idx} style={{ marginBottom: idx < details.length - 1 ? '16px' : '0', paddingBottom: idx < details.length - 1 ? '16px' : '0', borderBottom: idx < details.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    {item.item_number && <div style={{ fontSize: '11px', color: '#ab47fc', marginBottom: '8px', fontWeight: 'bold' }}>Item #{item.item_number}</div>}
+                    {Object.entries(item).filter(([k]) => k !== 'item_number').map(([key, value]) => (
+                      <div key={key} style={{ marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <code style={{ fontSize: '14px', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '6px', flex: 1, fontFamily: 'var(--mono)', wordBreak: 'break-all' }}>
+                            {String(value || 'N/A')}
+                          </code>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ));
+              }
+              if (details.status && details.status !== 'completed') {
+                return <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Order status: <strong style={{ color: '#eab308' }}>{details.status}</strong>. Delivery details will be available shortly.</div>;
+              }
+              return Object.entries(details).filter(([k]) => k !== 'raw_response' && k !== 'status').map(([key, value]) => (
+                <div key={key} style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <code style={{ fontSize: '14px', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '6px', flex: 1, fontFamily: 'var(--mono)', wordBreak: 'break-all' }}>
+                      {String(value || 'N/A')}
+                    </code>
+                  </div>
+                </div>
+              ));
+            })()}
+            
+            <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '8px', fontSize: '12px', color: '#eab308' }}>
+              <AlertCircle size={14} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
+              We recommend changing the password and securing the account immediately.
+            </div>
+          </div>
+          
+          <button className="btn btn-primary" onClick={closePurchaseModal} style={{ width: '100%', background: '#ab47fc', color: '#fff', border: 'none' }}>Back to Accounts</button>
+        </div>
+      ) : (
+        <div className="glass-panel" style={{ border: '1px solid rgba(171, 71, 252, 0.2)', borderRadius: '20px', padding: '24px', position: !isMobile ? 'sticky' : 'relative', top: !isMobile ? '24px' : 'auto' }}>
+          <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: 'var(--text-primary)' }}>Order Summary</h3>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Availability</span>
+            {selectedLog.stock > 0 ? (
+              <div style={{ fontSize: '13px', color: 'var(--color-green)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+                <span style={{ width: '8px', height: '8px', background: 'var(--color-green)', borderRadius: '50%', display: 'inline-block' }}></span>
+                In Stock ({selectedLog.stock})
+              </div>
+            ) : (
+              <div style={{ fontSize: '13px', color: 'var(--color-red)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
+                <span style={{ width: '8px', height: '8px', background: 'var(--color-red)', borderRadius: '50%', display: 'inline-block' }}></span>
+                Out of Stock
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Price per account</span>
+            <span style={{ color: 'var(--text-primary)', fontSize: '16px', fontFamily: 'var(--mono)' }}>{formatCost(currency === 'NGN' ? selectedLog.priceNgn : selectedLog.priceUsd)}</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Quantity</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)', padding: '6px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <button 
+                type="button" 
+                onClick={() => setPurchaseQuantity(Math.max(1, purchaseQuantity - 1))}
+                disabled={purchaseLoading || selectedLog.stock <= 0}
+                style={{ width: '32px', height: '32px', background: 'var(--bg-btn-secondary)', border: 'none', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >-</button>
+              <span style={{ fontSize: '16px', width: '24px', textAlign: 'center', fontFamily: 'var(--mono)', fontWeight: 'bold', color: 'var(--text-primary)' }}>{purchaseQuantity}</span>
+              <button 
+                type="button" 
+                onClick={() => setPurchaseQuantity(Math.min(selectedLog.stock, purchaseQuantity + 1))}
+                disabled={purchaseLoading || selectedLog.stock <= 0}
+                style={{ width: '32px', height: '32px', background: 'var(--bg-btn-secondary)', border: 'none', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >+</button>
+            </div>
+          </div>
+          
+          <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '20px 0' }} />
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <span style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: 'bold' }}>Total Cost</span>
+            <span style={{ color: '#ab47fc', fontSize: '24px', fontWeight: 'bold', fontFamily: 'var(--mono)' }}>
+              {formatCost((currency === 'NGN' ? selectedLog.priceNgn : selectedLog.priceUsd) * purchaseQuantity)}
+            </span>
+          </div>
+
+          <button 
+            className="btn btn-primary" 
+            onClick={handleBuy} 
+            disabled={purchaseLoading || selectedLog.stock <= 0}
+            style={{ width: '100%', padding: '16px', fontSize: '16px', background: 'linear-gradient(90deg, #9333ea 0%, #ab47fc 100%)', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px' }}
+          >
+            {purchaseLoading ? <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '3px', borderTopColor: '#fff' }}></div> : <><ShoppingCart size={18} /> Pay Securely</>}
+          </button>
+          
+          <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
+            <Shield size={12} style={{ display: 'inline', verticalAlign: 'text-top', marginRight: '4px' }} />
+            Secure transaction via wallet balance
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div className="animate-slide-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '40px' }}>
         <button 
@@ -109,11 +367,13 @@ const SocialMediaLogs = () => {
           
           {/* Left Column: Details */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            {selectedLog.image && (
-              <div style={{ width: '100%', height: '200px', borderRadius: '16px', overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
-                <img src={selectedLog.image} alt={selectedLog.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            )}
+            <ProductImage 
+              src={selectedLog.image} 
+              alt={selectedLog.name} 
+              category={selectedLog.category} 
+              height="200px" 
+              borderRadius="16px" 
+            />
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                 <div style={{ fontSize: '24px', background: 'rgba(255,255,255,0.05)', width: '48px', height: '48px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -121,152 +381,41 @@ const SocialMediaLogs = () => {
                 </div>
                 <div>
                   <span style={{ fontSize: '12px', color: '#ab47fc', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 'bold' }}>{selectedLog.category}</span>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Ref: {selectedLog.slug}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Ref: #{selectedLog.id}</div>
                 </div>
               </div>
               
               <h1 style={{ fontSize: isMobile ? '24px' : '32px', margin: '0 0 16px 0', lineHeight: '1.3' }}>{selectedLog.name}</h1>
               
-              {selectedLog.description ? (
+              {/* On mobile, render order summary / checkout card here, before the description! */}
+              {isMobile && (
+                <div style={{ marginBottom: '32px' }}>
+                  {renderCheckoutCard()}
+                </div>
+              )}
+
+              {detailsLoading ? (
+                <div style={{ display: 'flex', gap: '8px', flexDirection: 'column', marginTop: 12, padding: 12, background: 'rgba(0,0,0,0.2)', borderRadius: 8 }}>
+                  <div className="skeleton-pulse" style={{ height: '16px', width: '80%', borderRadius: '4px' }} />
+                  <div className="skeleton-pulse" style={{ height: '16px', width: '90%', borderRadius: '4px' }} />
+                  <div className="skeleton-pulse" style={{ height: '16px', width: '70%', borderRadius: '4px' }} />
+                  <div className="skeleton-pulse" style={{ height: '16px', width: '40%', borderRadius: '4px' }} />
+                </div>
+              ) : detailedDescription ? (
                 <div className="social-log-html-content" style={{ marginTop: 12, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 8, wordBreak: 'break-word' }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedLog.description.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }} />
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(detailedDescription.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }} />
               ) : (
                 <div style={{ fontSize: '15px', color: 'var(--text-muted)' }}>No description available for this product.</div>
               )}
             </div>
           </div>
 
-          {/* Right Column: Checkout Card */}
-          <div style={{ width: isMobile ? '100%' : '380px', flexShrink: 0 }}>
-            {purchaseSuccess ? (
-              <div className="glass-panel pulse-glow-cyan" style={{ padding: '32px 24px', textAlign: 'center', background: 'rgba(59, 183, 94, 0.05)', border: '1px solid rgba(59, 183, 94, 0.2)' }}>
-                <div style={{ width: '64px', height: '64px', background: 'rgba(59, 183, 94, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                  <CheckCircle size={32} color="var(--color-green)" />
-                </div>
-                <h2 style={{ margin: '0 0 10px', fontSize: '24px' }}>Purchase Successful!</h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '24px' }}>
-                  Your social media account details are ready. Please save them securely.
-                </p>
-                
-                <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '20px', textAlign: 'left', marginBottom: '24px' }}>
-                  <h4 style={{ margin: '0 0 16px', color: '#ab47fc', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Account Credentials</h4>
-                  
-                  {(() => {
-                    const details = purchaseSuccess.account_details;
-                    if (!details || (typeof details === 'object' && Object.keys(details).length === 0)) {
-                      return <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Order is being processed. Check your order history for delivery updates.</div>;
-                    }
-                    // If it's an array (multiple items)
-                    if (Array.isArray(details)) {
-                      return details.map((item, idx) => (
-                        <div key={idx} style={{ marginBottom: idx < details.length - 1 ? '16px' : '0', paddingBottom: idx < details.length - 1 ? '16px' : '0', borderBottom: idx < details.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                          {item.item_number && <div style={{ fontSize: '11px', color: '#ab47fc', marginBottom: '8px', fontWeight: 'bold' }}>Item #{item.item_number}</div>}
-                          {Object.entries(item).filter(([k]) => k !== 'item_number').map(([key, value]) => (
-                            <div key={key} style={{ marginBottom: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <code style={{ fontSize: '14px', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '6px', flex: 1, fontFamily: 'var(--mono)', wordBreak: 'break-all' }}>
-                                  {String(value || 'N/A')}
-                                </code>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ));
-                    }
-                    // If it's an object with status "processing"
-                    if (details.status && details.status !== 'completed') {
-                      return <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Order status: <strong style={{ color: '#eab308' }}>{details.status}</strong>. Delivery details will be available shortly.</div>;
-                    }
-                    // Flat object (single item) — filter out raw_response
-                    return Object.entries(details).filter(([k]) => k !== 'raw_response' && k !== 'status').map(([key, value]) => (
-                      <div key={key} style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <code style={{ fontSize: '14px', color: '#fff', background: 'rgba(255,255,255,0.05)', padding: '6px 10px', borderRadius: '6px', flex: 1, fontFamily: 'var(--mono)', wordBreak: 'break-all' }}>
-                            {String(value || 'N/A')}
-                          </code>
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                  
-                  <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '8px', fontSize: '12px', color: '#eab308' }}>
-                    <AlertCircle size={14} style={{ display: 'inline', verticalAlign: 'text-bottom', marginRight: '4px' }} />
-                    We recommend changing the password and securing the account immediately.
-                  </div>
-                </div>
-                
-                <button className="btn btn-primary" onClick={closePurchaseModal} style={{ width: '100%', background: '#ab47fc', color: '#fff', border: 'none' }}>Back to Accounts</button>
-              </div>
-            ) : (
-              <div className="glass-panel" style={{ border: '1px solid rgba(171, 71, 252, 0.2)', borderRadius: '20px', padding: '24px', position: 'sticky', top: '24px' }}>
-                <h3 style={{ margin: '0 0 20px 0', fontSize: '18px', color: 'var(--text-primary)' }}>Order Summary</h3>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Availability</span>
-                  {selectedLog.stock > 0 ? (
-                    <div style={{ fontSize: '13px', color: 'var(--color-green)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
-                      <span style={{ width: '8px', height: '8px', background: 'var(--color-green)', borderRadius: '50%', display: 'inline-block' }}></span>
-                      In Stock ({selectedLog.stock})
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: '13px', color: 'var(--color-red)', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold' }}>
-                      <span style={{ width: '8px', height: '8px', background: 'var(--color-red)', borderRadius: '50%', display: 'inline-block' }}></span>
-                      Out of Stock
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Price per account</span>
-                  <span style={{ color: 'var(--text-primary)', fontSize: '16px', fontFamily: 'var(--mono)' }}>{formatCost(currency === 'NGN' ? selectedLog.priceNgn : selectedLog.priceUsd)}</span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Quantity</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-input)', padding: '6px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                    <button 
-                      type="button" 
-                      onClick={() => setPurchaseQuantity(Math.max(1, purchaseQuantity - 1))}
-                      disabled={purchaseLoading || selectedLog.stock <= 0}
-                      style={{ width: '32px', height: '32px', background: 'var(--bg-btn-secondary)', border: 'none', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >-</button>
-                    <span style={{ fontSize: '16px', width: '24px', textAlign: 'center', fontFamily: 'var(--mono)', fontWeight: 'bold', color: 'var(--text-primary)' }}>{purchaseQuantity}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setPurchaseQuantity(Math.min(selectedLog.stock, purchaseQuantity + 1))}
-                      disabled={purchaseLoading || selectedLog.stock <= 0}
-                      style={{ width: '32px', height: '32px', background: 'var(--bg-btn-secondary)', border: 'none', borderRadius: '8px', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >+</button>
-                  </div>
-                </div>
-                
-                <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)', margin: '20px 0' }} />
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <span style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: 'bold' }}>Total Cost</span>
-                  <span style={{ color: '#ab47fc', fontSize: '24px', fontWeight: 'bold', fontFamily: 'var(--mono)' }}>
-                    {formatCost((currency === 'NGN' ? selectedLog.priceNgn : selectedLog.priceUsd) * purchaseQuantity)}
-                  </span>
-                </div>
-
-                <button 
-                  className="btn btn-primary" 
-                  onClick={handleBuy} 
-                  disabled={purchaseLoading || selectedLog.stock <= 0}
-                  style={{ width: '100%', padding: '16px', fontSize: '16px', background: 'linear-gradient(90deg, #9333ea 0%, #ab47fc 100%)', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', borderRadius: '12px' }}
-                >
-                  {purchaseLoading ? <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '3px', borderTopColor: '#fff' }}></div> : <><ShoppingCart size={18} /> Pay Securely</>}
-                </button>
-                
-                <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                  <Shield size={12} style={{ display: 'inline', verticalAlign: 'text-top', marginRight: '4px' }} />
-                  Secure transaction via wallet balance
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Right Column: Checkout Card (hidden on mobile since it's rendered inline above) */}
+          {!isMobile && (
+            <div style={{ width: '380px', flexShrink: 0 }}>
+              {renderCheckoutCard()}
+            </div>
+          )}
 
         </div>
       </div>
@@ -395,11 +544,13 @@ const SocialMediaLogs = () => {
               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'radial-gradient(circle, rgba(171,71,252,0.15) 0%, rgba(0,0,0,0) 70%)', zIndex: 0 }}></div>
               
               <div style={{ zIndex: 1 }}>
-                {log.image && (
-                  <div style={{ width: '100%', height: '120px', borderRadius: '8px', overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
-                    <img src={log.image} alt={log.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                )}
+                <ProductImage 
+                  src={log.image} 
+                  alt={log.name} 
+                  category={log.category} 
+                  height="120px" 
+                  borderRadius="8px" 
+                />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ fontSize: '24px', background: 'rgba(255,255,255,0.05)', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -420,6 +571,26 @@ const SocialMediaLogs = () => {
                       )}
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setPreviewModalLog(log); }}
+                    title="Preview Product Details"
+                    style={{
+                      fontSize: '11px',
+                      color: '#c084fc',
+                      background: 'rgba(171, 71, 252, 0.15)',
+                      border: '1px solid rgba(171, 71, 252, 0.3)',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      cursor: 'pointer',
+                      fontWeight: '600'
+                    }}
+                  >
+                    <Eye size={12} /> Preview
+                  </button>
                 </div>
                 
                 <h3 style={{ fontSize: '15px', lineHeight: '1.4', margin: '0 0 8px 0', fontWeight: '600' }}>{log.name}</h3>
@@ -442,7 +613,7 @@ const SocialMediaLogs = () => {
                 </div>
                 <button 
                   className="btn"
-                  onClick={() => navigate('/dashboard/social/buy/' + (log.slug || log.id))}
+                  onClick={() => navigate('/dashboard/social/buy/' + log.id)}
                   disabled={log.stock <= 0}
                   style={{ 
                     background: log.stock > 0 ? 'rgba(171, 71, 252, 0.15)' : 'rgba(255,255,255,0.05)', 
@@ -463,6 +634,165 @@ const SocialMediaLogs = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* In-App Product Preview Modal */}
+      {previewModalLog && createPortal(
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setPreviewModalLog(null)}
+        >
+          <div 
+            className="glass-panel" 
+            style={{
+              maxWidth: '560px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              borderRadius: '24px',
+              padding: isMobile ? '24px 20px' : '32px',
+              background: '#120a22',
+              border: '1px solid rgba(171, 71, 252, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              type="button"
+              onClick={() => setPreviewModalLog(null)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                color: '#fff',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', paddingRight: '40px' }}>
+              <div style={{ fontSize: '28px', background: 'rgba(255,255,255,0.05)', width: '52px', height: '52px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+                {getPlatformIcon(previewModalLog.category)}
+              </div>
+              <div>
+                <span style={{ fontSize: '12px', color: '#ab47fc', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 'bold' }}>{previewModalLog.category}</span>
+                <h2 style={{ margin: '4px 0 0 0', fontSize: '18px', color: '#fff', lineHeight: '1.3' }}>{previewModalLog.name}</h2>
+              </div>
+            </div>
+
+            {/* Stats Bar */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Availability</span>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: previewModalLog.stock > 0 ? 'var(--color-green)' : 'var(--color-red)' }}>
+                  {previewModalLog.stock > 0 ? `In Stock (${previewModalLog.stock})` : 'Out of Stock'}
+                </span>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block' }}>Price</span>
+                <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#ab47fc', fontFamily: 'var(--mono)' }}>
+                  {formatCost(currency === 'NGN' ? previewModalLog.priceNgn : previewModalLog.priceUsd)}
+                </span>
+              </div>
+            </div>
+
+            {/* Description Content */}
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#ab47fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product Details & Specification</h4>
+              {previewModalLog.description ? (
+                <div 
+                  className="social-log-html-content"
+                  style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', wordBreak: 'break-word' }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewModalLog.description.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }}
+                />
+              ) : (
+                <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>No description provided for this product.</div>
+              )}
+            </div>
+
+            {/* Embedded Verification / Inbox Link if present */}
+            {(() => {
+              const descMatch = previewModalLog.description ? previewModalLog.description.match(/https?:\/\/[^\s<"'\)\>\,\;\.]+/i) : null;
+              if (descMatch) {
+                return (
+                  <a 
+                    href={descMatch[0]} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '12px',
+                      background: 'rgba(171,71,252,0.1)',
+                      border: '1px solid rgba(171,71,252,0.3)',
+                      borderRadius: '12px',
+                      color: '#c084fc',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    <ExternalLink size={16} /> Open Verification Tool: {descMatch[0]}
+                  </a>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={() => setPreviewModalLog(null)}
+                style={{ flex: 1, padding: '14px', borderRadius: '12px' }}
+              >
+                Close
+              </button>
+              <button 
+                type="button"
+                className="btn btn-primary" 
+                disabled={previewModalLog.stock <= 0}
+                onClick={() => {
+                  const targetId = previewModalLog.id;
+                  setPreviewModalLog(null);
+                  navigate('/dashboard/social/buy/' + targetId);
+                }}
+                style={{ flex: 2, padding: '14px', borderRadius: '12px', background: 'linear-gradient(90deg, #9333ea 0%, #ab47fc 100%)', color: '#fff', border: 'none', fontWeight: 'bold' }}
+              >
+                Proceed to Buy
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

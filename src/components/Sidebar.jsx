@@ -138,6 +138,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   <span style={{ color: 'var(--color-pink)', fontWeight: '600' }}>Admin Panel</span>
                 </div>
               </li>
+              {/* 
+              <li className="sidebar-item">
+                <div
+                  onClick={() => handleNavClick('test')}
+                  className={`sidebar-link ${activeTab === 'test' ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}
+                >
+                  <Key size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
+                  <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-turquoise)' }}>
+                    VPN & AppSuite OTP (/test)
+                  </span>
+                </div>
+              </li>
+              */}
             </>
           )}
         </ul>

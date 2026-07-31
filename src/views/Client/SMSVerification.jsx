@@ -605,7 +605,7 @@ const SMSVerification = () => {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4, marginBottom: 8 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
                 {/* Server 2 Card */}
                 <div

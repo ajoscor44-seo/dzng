@@ -17,6 +17,7 @@ import Profile from './views/Client/Profile';
 import Support from './views/Client/Support';
 import DeveloperApi from './views/Client/DeveloperApi';
 import AdminDashboard from './views/Admin/AdminDashboard';
+import TestVpn from './views/TestVpn';
 import AboutUs from './views/AboutUs';
 import ContactUs from './views/ContactUs';
 import TermsOfService from './views/TermsOfService';
@@ -71,6 +72,16 @@ function AppContent() {
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<Auth fallbackTab="/dashboard" />} />
 
+      {/* Admin Test Route (/test) */}
+      <Route path="/test" element={<DashboardLayout />} >
+        <Route index element={<TestVpn />} />
+      </Route>
+
+      {/* Public Console Routes */}
+      <Route element={<DashboardLayout />}>
+        <Route path="/dashboard/social/*" element={<SocialMediaLogs />} />
+      </Route>
+
       {/* Protected Console Routes */}
       <Route path="/dashboard" element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
@@ -80,13 +91,13 @@ function AppContent() {
           <Route path="reuse" element={<ReuseNumbers />} />
           <Route path="esim/*" element={<ESim />} />
           <Route path="smm/*" element={<SmmPanel />} />
-          <Route path="social/*" element={<SocialMediaLogs />} />
           <Route path="wallet" element={<Wallet />} />
           <Route path="orders" element={<OrderHistory />} />
           <Route path="profile" element={<Profile />} />
           <Route path="api" element={<DeveloperApi />} />
           <Route path="support" element={<Support />} />
           <Route path="admin" element={<AdminDashboard />} />
+          <Route path="test" element={<TestVpn />} />
         </Route>
       </Route>
 

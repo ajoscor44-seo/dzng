@@ -253,12 +253,26 @@ export const AppProvider = ({ children }) => {
   // Profit Markup rate state
   const [profitMarkup, setProfitMarkup] = useState(() => {
     const saved = localStorage.getItem('zp_profit_markup');
-    return saved ? JSON.parse(saved) : { subs: 30, otp: 40, esim: 40, smm: 50 };
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.subs === 30) {
+          parsed.subs = 40;
+          localStorage.setItem('zp_profit_markup', JSON.stringify(parsed));
+        }
+        return parsed;
+      } catch (e) {}
+    }
+    return { subs: 40, otp: 40, esim: 40, smm: 50 };
   });
 
   const [exchangeRate, setExchangeRate] = useState(() => {
     const saved = localStorage.getItem('zp_exchange_rate');
-    return saved ? Number(saved) : 1350;
+    if (saved && (Number(saved) === 1350 || Number(saved) === 1400)) {
+      localStorage.setItem('zp_exchange_rate', '1500');
+      return 1500;
+    }
+    return saved ? Number(saved) : 1500;
   });
 
   // Fetch config from DB
@@ -2588,7 +2602,10 @@ export const AppProvider = ({ children }) => {
       const cached = sessionStorage.getItem('zp_social_logs');
       const cacheTime = sessionStorage.getItem('zp_social_logs_time');
       if (cached && cacheTime && Date.now() - Number(cacheTime) < 5 * 60 * 1000) {
-        return { success: true, data: JSON.parse(cached) };
+        const parsed = JSON.parse(cached);
+        if (parsed.length > 0 && parsed[0].preview !== undefined) {
+          return { success: true, data: parsed };
+        }
       }
 
       const { data, error } = await supabase.functions.invoke('ologstore-gateway', {
@@ -2603,8 +2620,15 @@ export const AppProvider = ({ children }) => {
         const basePriceUsd = p.price / 25400;
         const priceNgn = Math.max(500, Math.round(basePriceUsd * exchangeRate * (1 + markup / 100)));
         const priceUsd = priceNgn / exchangeRate;
+
+        const descLinkMatch = p.description ? p.description.match(/https?:\/\/[^\s<"'\)\>\,\;\.]+/i) : null;
+        const embeddedLink = descLinkMatch ? descLinkMatch[0] : null;
+        const productPageUrl = p.slug ? `https://ologstore.com/product/${p.slug}` : null;
+        const preview = p.preview || embeddedLink || productPageUrl;
+
         return {
           ...p,
+          preview,
           priceNgn,
           priceUsd
         };
@@ -2616,6 +2640,21 @@ export const AppProvider = ({ children }) => {
       return { success: true, data: productsWithCurrency };
     } catch (e) {
       console.error("Fetch Social Media Logs Error:", e);
+      return { success: false, msg: customizeGatewayError(e.message, 'Log Server') };
+    }
+  };
+
+  const fetchSocialMediaLogDetail = async (slug) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ologstore-gateway', {
+        body: { action: 'product_detail', payload: { slug } }
+      });
+      if (error || !data || !data.success) {
+        throw new Error(error ? error.message : (data ? data.error : 'Failed to fetch details'));
+      }
+      return { success: true, description: data.detail.description };
+    } catch (e) {
+      console.error("Fetch Social Media Log Detail Error:", e);
       return { success: false, msg: customizeGatewayError(e.message, 'Log Server') };
     }
   };
@@ -2744,6 +2783,7 @@ export const AppProvider = ({ children }) => {
       adminUpdateProfile,
       adminFetchAllOtpOrders,
       fetchSocialMediaLogs,
+      fetchSocialMediaLogDetail,
       buySocialMediaLog,
       checkSocialMediaLogStatus,
       socialMediaOrders

@@ -5,7 +5,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { CreditCard, ShieldAlert, ShieldCheck, Sun, Moon, Menu } from 'lucide-react';
 
 const Header = ({ sidebarOpen, setSidebarOpen }) => {
-  const { walletBalance, currency, toggleCurrency, formatCost, isAdmin, setIsAdmin, dbIsAdmin, theme, toggleTheme, user, profile } = useContext(AppContext);
+  const { walletBalance, currency, toggleCurrency, formatCost, isAdmin, setIsAdmin, dbIsAdmin, theme, toggleTheme, user, profile, isLoggedIn } = useContext(AppContext);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
@@ -107,29 +107,45 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
 
 
 
-        {/* Wallet Balance Display */}
-        <div 
-          onClick={() => navigate('/dashboard/wallet')}
-          className="glass-panel interactive" 
-          style={{ 
-            padding: isMobile ? '6px 10px' : '6px 14px', 
-            borderRadius: '20px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '6px', 
-            cursor: 'pointer',
-            border: '1px solid rgba(0, 242, 254, 0.25)',
-            background: 'rgba(0, 242, 254, 0.05)',
-            boxShadow: '0 0 10px rgba(0, 242, 254, 0.05)',
-            flexShrink: 0
-          }}
-          title="Click to fund wallet"
-        >
-          <CreditCard size={isMobile ? 12 : 14} style={{ color: 'var(--color-turquoise)' }} />
-          <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-            {formatCost(walletBalance)}
-          </span>
-        </div>
+        {/* Wallet Balance Display or Login Link */}
+        {isLoggedIn ? (
+          <div 
+            onClick={() => navigate('/dashboard/wallet')}
+            className="glass-panel interactive" 
+            style={{ 
+              padding: isMobile ? '6px 10px' : '6px 14px', 
+              borderRadius: '20px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px', 
+              cursor: 'pointer',
+              border: '1px solid rgba(0, 242, 254, 0.25)',
+              background: 'rgba(0, 242, 254, 0.05)',
+              boxShadow: '0 0 10px rgba(0, 242, 254, 0.05)',
+              flexShrink: 0
+            }}
+            title="Click to fund wallet"
+          >
+            <CreditCard size={isMobile ? 12 : 14} style={{ color: 'var(--color-turquoise)' }} />
+            <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+              {formatCost(walletBalance)}
+            </span>
+          </div>
+        ) : (
+          <button 
+            className="btn btn-primary" 
+            onClick={() => navigate('/login')}
+            style={{ 
+              padding: isMobile ? '6px 12px' : '8px 18px', 
+              borderRadius: '20px', 
+              fontSize: isMobile ? '12px' : '14px',
+              fontWeight: '700',
+              flexShrink: 0
+            }}
+          >
+            Log In
+          </button>
+        )}
 
       </div>
     </header>
