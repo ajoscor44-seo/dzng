@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { createPortal } from 'react-dom';
-import { Share2, ShoppingCart, Tag, AlertCircle, CheckCircle, Search, Shield, ChevronRight, ExternalLink, Eye } from 'lucide-react';
+import { Share2, ShoppingCart, Tag, AlertCircle, CheckCircle, Search, Shield, ChevronRight, ExternalLink, Eye, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '../../supabase';
 import facebookLogo from '../../assets/facebook.png';
 import chatgptLogo from '../../assets/chatgpt.jpeg';
@@ -111,6 +111,15 @@ const SocialMediaLogs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   
+  // Advanced filters state
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [ageFilter, setAgeFilter] = useState('All');
+  const [countryFilter, setCountryFilter] = useState('All');
+  const [stockFilter, setStockFilter] = useState('All');
+  const [priceSort, setPriceSort] = useState('default');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
+
   const navigate = useNavigate();
   const location = useLocation();
   const buyMatch = useMatch('/dashboard/social/buy/:id');
@@ -167,6 +176,17 @@ const SocialMediaLogs = () => {
     setLoading(false);
   };
 
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setActiveCategory('All');
+    setAgeFilter('All');
+    setCountryFilter('All');
+    setStockFilter('All');
+    setPriceSort('default');
+    setPriceMin('');
+    setPriceMax('');
+  };
+
   const categories = React.useMemo(() => {
     const set = new Set(
       logs
@@ -179,10 +199,53 @@ const SocialMediaLogs = () => {
   const filteredLogs = logs.filter(l => {
     const cat = l.category?.trim() || 'General';
     const name = l.name || '';
+    const desc = l.description || '';
+    const fullName = `${name} ${desc} ${cat}`.toLowerCase();
+
+    // 1. Category Filter
     if (activeCategory !== 'All' && cat.toLowerCase() !== activeCategory.toLowerCase()) return false;
+    
+    // 2. Search Filter
     if (searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+
+    // 3. Age Filter
+    if (ageFilter === 'Aged') {
+      if (!fullName.includes('aged') && !fullName.includes('cổ')) return false;
+    } else if (ageFilter === 'Fresh') {
+      if (!fullName.includes('fresh') && !fullName.includes('mới') && !fullName.includes('new')) return false;
+    }
+
+    // 4. Country Filter
+    if (countryFilter === 'USA') {
+      if (!fullName.includes('usa') && !fullName.includes(' us ') && !fullName.includes('united states')) return false;
+    } else if (countryFilter === 'UK') {
+      if (!fullName.includes('uk') && !fullName.includes('united kingdom')) return false;
+    } else if (countryFilter === 'Global/Mixed') {
+      if (!fullName.includes('global') && !fullName.includes('mixed') && !fullName.includes('all country')) return false;
+    } else if (countryFilter === 'Other') {
+      const matchesMain = fullName.includes('usa') || fullName.includes(' us ') || fullName.includes('united states') || 
+                          fullName.includes('uk') || fullName.includes('united kingdom') ||
+                          fullName.includes('global') || fullName.includes('mixed');
+      if (matchesMain) return false;
+    }
+
+    // 5. Stock Filter
+    if (stockFilter === 'In Stock' && l.stock <= 0) return false;
+
+    // 6. Price Range Filters
+    const finalPrice = l.priceNgn || 0;
+    if (priceMin !== '' && finalPrice < Number(priceMin)) return false;
+    if (priceMax !== '' && finalPrice > Number(priceMax)) return false;
+
     return true;
   }).sort((a, b) => {
+    if (priceSort === 'price_asc') {
+      return (a.priceNgn || 0) - (b.priceNgn || 0);
+    }
+    if (priceSort === 'price_desc') {
+      return (b.priceNgn || 0) - (a.priceNgn || 0);
+    }
+    
     const getScore = (log) => {
       let score = 0;
       const text = `${log.name || ''} ${log.category || ''}`.toLowerCase();
@@ -468,22 +531,68 @@ const SocialMediaLogs = () => {
         )}
       </div>
 
-      {/* Controls: Search and Categories */}
-      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '16px', alignItems: isMobile ? 'stretch' : 'center', justifyContent: 'space-between' }}>
+      {/* Controls: Search, Categories & Advanced Filters */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         
-        <div style={{ position: 'relative', flex: 1, maxWidth: isMobile ? '100%' : '300px' }}>
-          <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-          <input 
-            type="text" 
-            className="form-input" 
-            placeholder="Search accounts..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ paddingLeft: '44px', width: '100%', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}
-          />
+        {/* Row 1: Search Input & Action Buttons */}
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            <input 
+              type="text" 
+              className="form-input" 
+              placeholder="Search accounts..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ paddingLeft: '44px', width: '100%', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+          </div>
+          
+          <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="btn btn-secondary"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              padding: '10px 16px', 
+              borderRadius: '12px',
+              fontSize: '13px',
+              border: `1px solid ${showAdvancedFilters ? '#ab47fc' : 'rgba(255,255,255,0.1)'}`,
+              background: showAdvancedFilters ? 'rgba(171,71,252,0.15)' : 'rgba(255,255,255,0.02)',
+              color: '#fff',
+              whiteSpace: 'nowrap',
+              height: '42px',
+              cursor: 'pointer'
+            }}
+          >
+            <SlidersHorizontal size={14} style={{ color: showAdvancedFilters ? '#ab47fc' : 'var(--text-secondary)' }} />
+            <span>Filters</span>
+          </button>
+
+          {(searchQuery || activeCategory !== 'All' || ageFilter !== 'All' || countryFilter !== 'All' || stockFilter !== 'All' || priceSort !== 'default' || priceMin || priceMax) && (
+            <button 
+              onClick={handleClearFilters}
+              className="btn btn-secondary"
+              style={{ 
+                padding: '10px 16px', 
+                borderRadius: '12px',
+                fontSize: '13px',
+                color: 'var(--color-red)',
+                border: '1px solid rgba(255, 59, 48, 0.15)',
+                background: 'rgba(255, 59, 48, 0.05)',
+                whiteSpace: 'nowrap',
+                height: '42px',
+                cursor: 'pointer'
+              }}
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none' }} className="hide-scrollbar">
+        {/* Row 2: Categories Carousel */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', width: '100%' }} className="hide-scrollbar">
           {categories.map(cat => (
             <button
               key={cat}
@@ -505,6 +614,108 @@ const SocialMediaLogs = () => {
             </button>
           ))}
         </div>
+
+        {/* Row 3: Advanced Filters Grid (Collapsible) */}
+        {showAdvancedFilters && (
+          <div 
+            className="glass-panel animate-slide-in" 
+            style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+              gap: '16px', 
+              padding: '20px', 
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(15, 10, 25, 0.6)'
+            }}
+          >
+            {/* Price Sorting */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Price Sort</label>
+              <select 
+                value={priceSort} 
+                onChange={e => setPriceSort(e.target.value)} 
+                className="form-input" 
+                style={{ width: '100%', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px' }}
+              >
+                <option value="default" style={{ background: '#120a22', color: '#fff' }}>Recommended</option>
+                <option value="price_asc" style={{ background: '#120a22', color: '#fff' }}>Price: Low to High</option>
+                <option value="price_desc" style={{ background: '#120a22', color: '#fff' }}>Price: High to Low</option>
+              </select>
+            </div>
+
+            {/* Account Age */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Account Age</label>
+              <select 
+                value={ageFilter} 
+                onChange={e => setAgeFilter(e.target.value)} 
+                className="form-input" 
+                style={{ width: '100%', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px' }}
+              >
+                <option value="All" style={{ background: '#120a22', color: '#fff' }}>All Ages</option>
+                <option value="Aged" style={{ background: '#120a22', color: '#fff' }}>Aged Accounts</option>
+                <option value="Fresh" style={{ background: '#120a22', color: '#fff' }}>Fresh Accounts</option>
+              </select>
+            </div>
+
+            {/* Region / Country */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Region/Country</label>
+              <select 
+                value={countryFilter} 
+                onChange={e => setCountryFilter(e.target.value)} 
+                className="form-input" 
+                style={{ width: '100%', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px' }}
+              >
+                <option value="All" style={{ background: '#120a22', color: '#fff' }}>All Regions</option>
+                <option value="USA" style={{ background: '#120a22', color: '#fff' }}>United States (USA)</option>
+                <option value="UK" style={{ background: '#120a22', color: '#fff' }}>United Kingdom (UK)</option>
+                <option value="Global/Mixed" style={{ background: '#120a22', color: '#fff' }}>Global / Mixed</option>
+                <option value="Other" style={{ background: '#120a22', color: '#fff' }}>Other Countries</option>
+              </select>
+            </div>
+
+            {/* Stock Availability */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Stock Status</label>
+              <select 
+                value={stockFilter} 
+                onChange={e => setStockFilter(e.target.value)} 
+                className="form-input" 
+                style={{ width: '100%', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '8px' }}
+              >
+                <option value="All" style={{ background: '#120a22', color: '#fff' }}>All Status</option>
+                <option value="In Stock" style={{ background: '#120a22', color: '#fff' }}>In Stock Only</option>
+              </select>
+            </div>
+
+            {/* Price Range */}
+            <div>
+              <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Price Range (NGN)</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input 
+                  type="number" 
+                  placeholder="Min" 
+                  value={priceMin}
+                  onChange={e => setPriceMin(e.target.value)}
+                  className="form-input"
+                  style={{ flex: 1, borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', fontSize: '12px', color: '#fff' }}
+                />
+                <span style={{ color: 'var(--text-muted)' }}>-</span>
+                <input 
+                  type="number" 
+                  placeholder="Max" 
+                  value={priceMax}
+                  onChange={e => setPriceMax(e.target.value)}
+                  className="form-input"
+                  style={{ flex: 1, borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px', fontSize: '12px', color: '#fff' }}
+                />
+              </div>
+            </div>
+
+          </div>
+        )}
       </div>
 
       {/* Main Content Area */}

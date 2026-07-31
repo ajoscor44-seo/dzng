@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { 
   RefreshCw, Key, Search, Phone, CheckCircle, AlertCircle, 
   HelpCircle, X, Calendar, Copy, Check, Shield, Info, ChevronRight
@@ -87,6 +88,7 @@ const ReuseNumbers = () => {
     setIsRebuying(false);
 
     if (res.success) {
+      posthog.capture('otp_number_reuse_requested', { reuse_source: 'manual' });
       setFeedback({ 
         success: true, 
         msg: `Number request submitted! Redirecting to SMS OTP (Temp) tab...` 
@@ -113,6 +115,7 @@ const ReuseNumbers = () => {
     setIsRebuying(false);
 
     if (res.success) {
+      posthog.capture('otp_number_reuse_requested', { reuse_source: 'history' });
       setFeedback({ 
         success: true, 
         msg: `Success! Rebuy request approved. Provisioning session...` 

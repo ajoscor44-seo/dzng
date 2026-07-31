@@ -3,6 +3,7 @@ import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { Mail, Phone, MapPin, Send, MessageSquare, CheckCircle, ChevronDown, ChevronUp, Copy, Check, Shield } from 'lucide-react';
 import { supabase } from '../../supabase';
+import posthog from '../../posthog';
 
 const Support = () => {
   const { user, profile } = useContext(AppContext);
@@ -84,6 +85,7 @@ const Support = () => {
       if (error) {
         alert(`Failed to submit ticket: ${error.message}`);
       } else {
+        posthog.capture('support_ticket_created');
         setSuccess(true);
         setTicketId(genTicketId);
         setSubject('');

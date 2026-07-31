@@ -3,6 +3,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { Smartphone, Download, Wifi, AlertCircle, Info, Check, Copy, X } from 'lucide-react';
 
 const regionEmoji = { 'All': '🌍', 'North America': '🌎', 'Europe': '🇪🇺', 'Asia': '🌏', 'Africa': '🌍', 'Global': '🛰️' };
@@ -47,7 +48,18 @@ const ESim = () => {
     setIsBuying(true);
     const result = await buyEsim(selectedPkg.id);
     setIsBuying(false);
-    if (result.success) { setActiveEsimDetails(result.esim); navigate('/dashboard/esim'); }
+    if (result.success) {
+      posthog.capture('esim_purchased', {
+        package_id: selectedPkg.id,
+        package_region: selectedPkg.region,
+        data_gb: selectedPkg.dataGb,
+        duration_days: selectedPkg.durationDays,
+        is_unlimited: selectedPkg.isUnlimited,
+        price_ngn: selectedPkg.priceNgn,
+      });
+      setActiveEsimDetails(result.esim);
+      navigate('/dashboard/esim');
+    }
     else setErrorMsg(result.msg);
   };
 

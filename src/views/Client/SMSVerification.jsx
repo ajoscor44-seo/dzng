@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect, useMemo, useCallback } from 're
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { supabase } from '../../supabase';
+import posthog from '../../posthog';
 import { Key, Copy, Check, Clock, AlertTriangle, AlertCircle, RefreshCw, XCircle, Search } from 'lucide-react';
 
 const serviceLogoMap = {
@@ -328,8 +329,10 @@ const SMSVerification = () => {
     const countryId = server === 'server3' ? 'US' : selectedCountry;
     const result = await requestOtpNumber(countryId, selectedService, selectedServiceObj, server);
     setIsRequesting(false);
-    if (result.success) setActiveSession(result.otp);
-    else setErrorMsg(result.error || result.msg || 'Failed to request number');
+    if (result.success) {
+      posthog.capture('otp_number_requested', { provider: server });
+      setActiveSession(result.otp);
+    } else setErrorMsg(result.error || result.msg || 'Failed to request number');
   };
 
   const handleSelectTvService = useCallback(async (serviceName) => {

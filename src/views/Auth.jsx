@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { supabase } from '../supabase';
+import posthog from '../posthog';
 import { Compass, Mail, Lock, User, Phone, CheckSquare, Square, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 const Auth = () => {
@@ -46,6 +47,7 @@ const Auth = () => {
       if (error) {
         setErrorMsg(error.message);
       } else {
+        posthog.capture('password_reset_requested');
         setErrorMsg('Password reset link sent! Check your email.');
       }
       return;
@@ -85,6 +87,7 @@ const Auth = () => {
           return;
         }
 
+        posthog.capture('user_logged_in');
         setLoading(false);
         navigate(from, { replace: true });
       } else {
@@ -115,6 +118,7 @@ const Auth = () => {
           return;
         }
 
+        posthog.capture('user_registered');
         setLoading(false);
         if (data?.session) {
           navigate(from, { replace: true });

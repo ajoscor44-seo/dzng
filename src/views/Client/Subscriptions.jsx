@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { User, Eye, EyeOff, Check, Clipboard, AlertCircle } from 'lucide-react';
 
 import netflixLogo from '../../assets/netflix.jpeg';
@@ -50,6 +51,11 @@ const Subscriptions = () => {
 
     const result = await buySharedSubscription(selectedSub.id);
     if (result.success) {
+      posthog.capture('subscription_purchased', {
+        subscription_id: selectedSub.id,
+        subscription_category: selectedSub.category,
+        price_ngn: selectedSub.priceNgn,
+      });
       setPurchaseSuccess(true);
       setGeneratedAccount(result.sub);
       setTimeout(() => {

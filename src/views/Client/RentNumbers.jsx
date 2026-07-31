@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { Phone, Clock, Mail, RefreshCw, AlertCircle, AlertTriangle, ChevronRight, Check } from 'lucide-react';
 
 const RentNumbers = () => {
@@ -42,6 +43,11 @@ const RentNumbers = () => {
     const result = await rentNumber(selectedCountry, purpose, duration, server);
     setIsRenting(false);
     if (result.success) {
+      posthog.capture('number_rented', {
+        rental_duration_days: duration,
+        service_purpose: purpose,
+        provider: server,
+      });
       setRentSuccess(true);
       setTimeout(() => setRentSuccess(false), 3000);
     } else {

@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useRef } from 'react';
+import posthog from '../posthog';
 import { supabase } from '../supabase';
 
 export const AppContext = createContext();
@@ -508,25 +509,32 @@ export const AppProvider = ({ children }) => {
     { id: 'tx-002', type: 'Purchase', amountNgn: 1500, amountUsd: 2.0, method: 'Wallet (YouTube Premium)', date: new Date(Date.now() - 3600000 * 12).toLocaleString(), status: 'SUCCESS' }
   ]);
 
-  useEffect(() => {
-    // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsLoggedIn(true);
-        setUser(session.user);
-      } else {
-        setIsLoggedIn(false);
-        setUser(null);
-        setIsAuthLoading(false);
-      }
-    });
+  const identifiedUserId = useRef(null);
 
-    // 2. Listen to auth changes
+  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        const { user: authenticatedUser } = session;
+
+        if (identifiedUserId.current !== authenticatedUser.id) {
+          if (identifiedUserId.current) {
+            posthog.reset();
+          }
+
+          posthog.identify(authenticatedUser.id, {
+            email: authenticatedUser.email,
+            name: authenticatedUser.user_metadata?.full_name,
+            username: authenticatedUser.user_metadata?.username,
+          });
+          identifiedUserId.current = authenticatedUser.id;
+        }
         setIsLoggedIn(true);
-        setUser(session.user);
+        setUser(authenticatedUser);
       } else {
+        if (identifiedUserId.current) {
+          posthog.reset();
+          identifiedUserId.current = null;
+        }
         setIsLoggedIn(false);
         setUser(null);
         setIsAuthLoading(false);

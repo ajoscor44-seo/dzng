@@ -3,6 +3,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { 
   Share2, Link, Layers, AlertCircle, Sparkles, Send, Info, Zap, X, 
   Users, Heart, Play, TrendingUp, ChevronDown, ChevronUp, Check, 
@@ -283,6 +284,11 @@ const SmmPanel = () => {
     setIsLaunching(false);
 
     if (result.success) {
+      posthog.capture('smm_order_submitted', {
+        service_id: selectedService.id,
+        platform: selectedService.platform,
+        quantity,
+      });
       setOrderSuccess(true);
       setTimeout(() => {
         setOrderSuccess(false);

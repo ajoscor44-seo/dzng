@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
+import posthog from '../../posthog';
 import { CreditCard, Landmark, Coins, AlertCircle, Check, Copy, Wallet2, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 
 const Wallet = () => {
@@ -42,6 +43,8 @@ const Wallet = () => {
     setIsGenerating(false);
     if (result && !result.success) {
       setGenerationError(result.msg || "Failed to generate virtual wallet account.");
+    } else if (result?.success) {
+      posthog.capture('virtual_wallet_generated', { funding_partner: selectedBank });
     }
   };
 
