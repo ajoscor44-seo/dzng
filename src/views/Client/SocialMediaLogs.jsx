@@ -58,6 +58,7 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     const n = name?.toLowerCase() || '';
     
     // Local overrides
+    if (c.includes('facebook') || c.includes('fb')) return facebookLogo;
     if (c.includes('netflix')) return netflixLogo;
     if (c.includes('spotify')) return spotifyLogo;
     if (c.includes('youtube') || c.includes('yt')) return youtubeLogo;
