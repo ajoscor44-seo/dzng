@@ -363,26 +363,21 @@ serve(async (req) => {
         });
       }
 
-      // 2. Deduct Balance
+      // 2. Process Purchase & Deduct Balance atomically via DB Function
       const newBalance = profile.wallet_balance - cost;
-      const { error: deductError } = await supabaseAdmin
-        .from("profiles")
-        .update({ wallet_balance: newBalance })
-        .eq("id", user.id);
-
-      if (deductError) {
-        throw new Error("Failed to deduct balance");
-      }
-
-      // 3. Log the transaction
-      await supabaseAdmin.from("transactions").insert({
-        user_id: user.id,
-        amount: cost,
-        type: "debit",
-        description: `Purchased Social Media Log: ${plan_name} (x${quantity})`,
-        status: "completed",
-        reference: `accsbulk_${Date.now()}`
+      const { data: purchaseSuccessResult, error: purchaseError } = await supabaseAdmin.rpc("process_purchase", {
+        p_user_id: user.id,
+        p_amount: cost,
+        p_type: "Purchase",
+        p_method: `Social: ${plan_name} (x${quantity})`
       });
+
+      if (purchaseError) {
+        return new Response(JSON.stringify({ success: false, error: purchaseError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       // 4. Place order with AccsBulk
       let orderResult = null;
@@ -411,19 +406,13 @@ serve(async (req) => {
         }
       } catch (err) {
         console.warn("AccsBulk error, refunding user:", err);
-        // Refund User
-        const { data: currentProfile } = await supabaseAdmin.from("profiles").select("wallet_balance").eq("id", user.id).single();
-        if (currentProfile) {
-          await supabaseAdmin.from("profiles").update({ wallet_balance: currentProfile.wallet_balance + cost }).eq("id", user.id);
-        }
-          
-        await supabaseAdmin.from("transactions").insert({
-          user_id: user.id,
-          amount: cost,
-          type: "credit",
-          description: `Refund: Failed to purchase ${plan_name}`,
-          status: "completed",
-          reference: `refund_accsbulk_${Date.now()}`
+        // Refund User atomically via DB Function
+        const refundTxId = `tx-ref-${crypto.randomUUID().replace(/-/g, '').substring(0, 8)}`;
+        await supabaseAdmin.rpc("process_deposit", {
+          p_tx_id: refundTxId,
+          p_user_id: user.id,
+          p_amount: cost,
+          p_method: `Refund: Failed to purchase ${plan_name}`
         });
 
         const errMsg = err.message || '';

@@ -278,6 +278,23 @@ const OrderHistory = () => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+      if (start > 2) pages.push('...');
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < totalPages - 1) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   /* Summary stats */
   const totalSpent = allOrders
     .filter(o => o.type !== 'Deposit' && o.type !== 'Refund')
@@ -530,21 +547,30 @@ const OrderHistory = () => {
           >
             ← Prev
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              style={{
-                width: 36, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer',
-                fontSize: 13, fontWeight: 700,
-                background: page === p ? 'var(--color-turquoise)' : 'rgba(255,255,255,0.05)',
-                color: page === p ? '#fff' : 'var(--text-secondary)',
-                transition: 'all 0.2s',
-              }}
-            >
-              {p}
-            </button>
-          ))}
+          {getPageNumbers().map((p, idx) => {
+            if (p === '...') {
+              return (
+                <span key={`ell-${idx}`} style={{ color: 'var(--text-muted)', padding: '0 8px', fontSize: 13, fontWeight: 700 }}>
+                  ...
+                </span>
+              );
+            }
+            return (
+              <button
+                key={p}
+                onClick={() => setPage(p)}
+                style={{
+                  width: 36, height: 36, borderRadius: 8, border: 'none', cursor: 'pointer',
+                  fontSize: 13, fontWeight: 700,
+                  background: page === p ? 'var(--color-turquoise)' : 'rgba(255,255,255,0.05)',
+                  color: page === p ? '#fff' : 'var(--text-secondary)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {p}
+              </button>
+            );
+          })}
           <button
             className="btn btn-secondary"
             style={{ padding: '6px 14px', fontSize: 13 }}
