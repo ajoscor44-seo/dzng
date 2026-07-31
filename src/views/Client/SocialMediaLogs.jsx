@@ -193,7 +193,44 @@ const SocialMediaLogs = () => {
         .map(l => l.category?.trim())
         .filter(Boolean)
     );
-    return ['All', ...[...set].sort()];
+    const uniqueCats = [...set];
+
+    // Popular priority keywords - Facebook, Instagram, TikTok, WhatsApp etc. come first
+    const priorityKeywords = [
+      'facebook', 
+      'instagram', 
+      'tiktok', 
+      'whatsapp', 
+      'telegram', 
+      'gmail', 
+      'google voice', 
+      'snapchat', 
+      'twitter', 
+      'x', 
+      'linkedin', 
+      'netflix', 
+      'spotify', 
+      'discord', 
+      'apple'
+    ];
+
+    uniqueCats.sort((a, b) => {
+      const lowA = a.toLowerCase();
+      const lowB = b.toLowerCase();
+
+      const idxA = priorityKeywords.findIndex(kw => lowA.includes(kw));
+      const idxB = priorityKeywords.findIndex(kw => lowB.includes(kw));
+
+      if (idxA !== -1 && idxB !== -1) {
+        return idxA - idxB;
+      }
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+
+      return lowA.localeCompare(lowB);
+    });
+
+    return ['All', ...uniqueCats];
   }, [logs]);
 
   const filteredLogs = logs.filter(l => {
@@ -205,8 +242,8 @@ const SocialMediaLogs = () => {
     // 1. Category Filter
     if (activeCategory && activeCategory !== 'All' && cat.toLowerCase() !== activeCategory.toLowerCase()) return false;
     
-    // 2. Search Filter
-    if (searchQuery && !fullName.includes(searchQuery.toLowerCase().trim())) return false;
+    // 2. Search Filter (loops through title/name only as requested)
+    if (searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase().trim())) return false;
 
     // 3. Age Filter
     if (ageFilter === 'Aged') {
