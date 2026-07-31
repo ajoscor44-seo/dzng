@@ -118,6 +118,7 @@ const OrderHistory = () => {
   const [sortBy, setSortBy] = useState('date_desc');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [viewingCredentialsLog, setViewingCredentialsLog] = useState(null);
   const [page, setPage] = useState(1);
   const [isRebuying, setIsRebuying] = useState(false);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
@@ -161,7 +162,7 @@ const OrderHistory = () => {
         date: tx.date || '—',
         status: tx.status || 'SUCCESS',
         detail: null,
-        rawDate: tx.rawDate || tx.date,
+        rawDate: tx.created_at || tx.date,
         raw: tx,
       });
     });
@@ -243,7 +244,7 @@ const OrderHistory = () => {
       });
     });
 
-    return orders;
+    return orders.filter(o => !o.method?.toLowerCase().includes('appsuite'));
   }, [transactions, activeOtps, rentedNumbers, activeEsims, smmOrders, socialMediaOrders]);
 
   /* Filter + search + sort */
@@ -265,10 +266,12 @@ const OrderHistory = () => {
     }
 
     list = [...list].sort((a, b) => {
-      if (sortBy === 'date_asc') return new Date(a.rawDate) - new Date(b.rawDate);
+      const dateA = new Date(a.rawDate || 0).getTime() || 0;
+      const dateB = new Date(b.rawDate || 0).getTime() || 0;
+      if (sortBy === 'date_asc') return dateA - dateB;
       if (sortBy === 'amount_desc') return b.amountNgn - a.amountNgn;
       if (sortBy === 'amount_asc') return a.amountNgn - b.amountNgn;
-      return new Date(b.rawDate) - new Date(a.rawDate); // date_desc default
+      return dateB - dateA; // date_desc default
     });
 
     return list;
@@ -836,53 +839,10 @@ const OrderHistory = () => {
                     )}
                     {selectedOrder.raw.account_details && (() => {
                       const details = selectedOrder.raw.account_details;
-                      const renderKV = (obj) => Object.entries(obj).filter(([k]) => !['raw_response', 'status', 'item_number'].includes(k)).map(([key, value]) => {
-                        const valStr = String(value || 'N/A');
-                        const isLong = valStr.length > 25 || valStr.includes('|') || valStr.includes(':');
-                        if (isLong) {
-                          return (
-                            <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
-                              <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize', fontSize: '12px' }}>{key.replace(/_/g, ' ')}</span>
-                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '12px', wordBreak: 'break-all', flex: 1, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{valStr}</code>
-                                <button 
-                                  onClick={() => { navigator.clipboard.writeText(valStr); }}
-                                  style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0, padding: 0, marginTop: '2px' }}
-                                  title={`Copy ${key}`}
-                                >
-                                  <Copy size={13} />
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        }
-                        return (
-                          <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-                            <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '13px', wordBreak: 'break-all', textAlign: 'right', maxWidth: '200px' }}>{valStr}</code>
-                              <button 
-                                onClick={() => { navigator.clipboard.writeText(valStr); }}
-                                style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0 }}
-                                title={`Copy ${key}`}
-                              >
-                                <Copy size={12} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      });
-                      if (Array.isArray(details)) {
-                        return details.map((item, idx) => (
-                          <div key={idx}>
-                            {item.item_number && <div style={{ fontSize: '11px', color: '#ab47fc', fontWeight: 'bold', marginBottom: '4px', marginTop: idx > 0 ? '8px' : 0 }}>Item #{item.item_number}</div>}
-                            {renderKV(item)}
-                          </div>
-                        ));
-                      }
+                      
                       if (details.status && details.status !== 'completed') {
                         return (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', borderRadius: '8px', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', borderRadius: '8px', marginTop: '8px', width: '100%' }}>
                             <div style={{ fontSize: '13px', color: '#eab308', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <Clock size={14} />
                               <span>Order status: {details.status}. Delivery pending.</span>
@@ -908,10 +868,14 @@ const OrderHistory = () => {
                           </div>
                         );
                       }
-                      const kvElements = renderKV(details);
-                      if (kvElements.length === 0) {
+
+                      const hasKeys = Array.isArray(details) 
+                        ? details.some(item => Object.keys(item).some(k => !['raw_response', 'status', 'item_number'].includes(k)))
+                        : Object.keys(details).some(k => !['raw_response', 'status', 'item_number'].includes(k));
+
+                      if (!hasKeys) {
                         return (
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', borderRadius: '8px', marginTop: '8px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)', borderRadius: '8px', marginTop: '8px', width: '100%' }}>
                             <div style={{ fontSize: '13px', color: '#eab308', display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <Clock size={14} />
                               <span>No credentials delivered yet. Click below to refresh.</span>
@@ -937,7 +901,30 @@ const OrderHistory = () => {
                           </div>
                         );
                       }
-                      return kvElements;
+
+                      return (
+                        <button
+                          onClick={() => setViewingCredentialsLog(details)}
+                          className="btn btn-primary"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            borderRadius: '10px',
+                            background: 'linear-gradient(90deg, #9333ea 0%, #ab47fc 100%)',
+                            border: 'none',
+                            color: '#fff',
+                            fontWeight: 'bold',
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px'
+                          }}
+                        >
+                          <Key size={14} />
+                          View Log Credentials
+                        </button>
+                      );
                     })()}
                   </>
                 )}
@@ -1004,6 +991,95 @@ const OrderHistory = () => {
               </button>
             </div>
 
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Log Credentials Modal ── */}
+      {viewingCredentialsLog && createPortal(
+        <div className="modal-overlay" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100 }} onClick={() => setViewingCredentialsLog(null)}>
+          <div 
+            className="modal-content animate-slide-in"
+            onClick={e => e.stopPropagation()} 
+            style={{ 
+              width: '90%',
+              maxWidth: '400px', 
+              border: '1px solid var(--border-color)', 
+              boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
+              padding: '20px',
+              borderRadius: '16px',
+              background: 'var(--bg-modal)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontSize: '13px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--color-violet)' }}>
+                Account Credentials
+              </span>
+              <button 
+                onClick={() => setViewingCredentialsLog(null)} 
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '20px' }}
+              >
+                &times;
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {(() => {
+                const details = viewingCredentialsLog;
+                const renderKV = (obj) => Object.entries(obj).filter(([k]) => !['raw_response', 'status', 'item_number'].includes(k)).map(([key, value]) => {
+                  const valStr = String(value || 'N/A');
+                  const isLong = valStr.length > 25 || valStr.includes('|') || valStr.includes(':');
+                  if (isLong) {
+                    return (
+                      <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>
+                        <span style={{ color: 'var(--text-secondary)', textTransform: 'capitalize', fontSize: '11px', fontWeight: 'bold' }}>{key.replace(/_/g, ' ')}</span>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: 'rgba(255,255,255,0.02)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                          <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '11px', wordBreak: 'break-all', flex: 1, lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>{valStr}</code>
+                          <button 
+                            onClick={() => { navigator.clipboard.writeText(valStr); }}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0, padding: 0, marginTop: '2px' }}
+                            title={`Copy ${key}`}
+                          >
+                            <Copy size={12} style={{ color: 'var(--color-turquoise)' }} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+                      <span style={{ color: 'var(--text-secondary)', fontSize: '12px', textTransform: 'capitalize' }}>{key.replace(/_/g, ' ')}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <code style={{ fontFamily: 'monospace', color: 'var(--text-primary)', fontSize: '12px', wordBreak: 'break-all', textAlign: 'right', maxWidth: '180px' }}>{valStr}</code>
+                        <button 
+                          onClick={() => { navigator.clipboard.writeText(valStr); }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--color-turquoise)', cursor: 'pointer', flexShrink: 0 }}
+                          title={`Copy ${key}`}
+                        >
+                          <Copy size={11} style={{ color: 'var(--color-turquoise)' }} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                });
+                if (Array.isArray(details)) {
+                  return details.map((item, idx) => (
+                    <div key={idx}>
+                      {item.item_number && <div style={{ fontSize: '11px', color: '#ab47fc', fontWeight: 'bold', marginBottom: '4px', marginTop: idx > 0 ? '8px' : 0 }}>Item #{item.item_number}</div>}
+                      {renderKV(item)}
+                    </div>
+                  ));
+                }
+                return renderKV(details);
+              })()}
+            </div>
+            <button
+              onClick={() => setViewingCredentialsLog(null)}
+              className="btn btn-secondary"
+              style={{ width: '100%', marginTop: '16px', padding: '10px', borderRadius: '8px', fontSize: '13px' }}
+            >
+              Close
+            </button>
           </div>
         </div>,
         document.body

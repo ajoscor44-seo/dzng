@@ -654,7 +654,8 @@ export const AppProvider = ({ children }) => {
           amountUsd: Number(tx.amount) / exchangeRate,
           method: tx.method,
           date: new Date(tx.created_at).toLocaleString(),
-          status: tx.status
+          status: tx.status,
+          created_at: tx.created_at
         })));
       } else if (txs && txs.length === 0) {
         setTransactions([]);
@@ -758,7 +759,8 @@ export const AppProvider = ({ children }) => {
               amountUsd: Number(tx.amount) / exchangeRate,
               method: tx.method,
               date: new Date(tx.created_at).toLocaleString(),
-              status: tx.status
+              status: tx.status,
+              created_at: tx.created_at
             },
             ...prev.filter(t => t.id !== tx.id) // avoid duplicates if already prepended
           ]);
