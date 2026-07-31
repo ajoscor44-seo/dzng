@@ -1798,9 +1798,9 @@ const AdminDashboard = () => {
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 <select className="wp-select" value={filterOtpServer} onChange={(e) => setFilterOtpServer(e.target.value)}>
                   <option value="ALL">All Servers</option>
-                  <option value="server2">Server 2 (SMSPool)</option>
-                  <option value="server3">Server 3 (Textverified)</option>
-                  <option value="server4">Server 4 (HeroSMS)</option>
+                  <option value="server2">Server 2</option>
+                  <option value="server3">Server 3</option>
+                  <option value="server4">Server 4</option>
                 </select>
 
                 <select className="wp-select" value={filterOtpStatus} onChange={(e) => setFilterOtpStatus(e.target.value)}>
