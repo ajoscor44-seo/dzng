@@ -605,6 +605,7 @@ const OrderHistory = () => {
               padding: isMobile ? '24px 16px 40px 16px' : '24px',
               maxHeight: isMobile ? '85vh' : '90vh',
               overflowY: 'auto',
+              overflowX: 'hidden',
               borderRadius: isMobile ? '24px 24px 0 0' : '20px',
               margin: isMobile ? '0' : 'auto'
             }}

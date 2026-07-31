@@ -16,6 +16,11 @@ import youtubeLogo from '../../assets/youtube.jpeg';
 import whatsappLogo from '../../assets/whatsapp.jpg';
 import xLogo from '../../assets/x.jpg';
 import appleLogo from '../../assets/apple.png';
+import gmxLogo from '../../assets/gmx.png';
+import xproxyLogo from '../../assets/xproxy.jpg';
+import robloxLogo from '../../assets/roblox.jpg';
+import yandexLogo from '../../assets/yandex.png';
+import amazonLogo from '../../assets/amazon.jpg';
 
 const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8px' }) => {
   const [error, setError] = useState(false);
@@ -60,8 +65,13 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (n.includes('claude')) return claudeLogo;
     if (n.includes('chatgpt') || n.includes('gpt')) return chatgptLogo;
     if (c.includes('whatsapp') || c.includes('wa')) return whatsappLogo;
-    if (c.includes('twitter') || c.includes('x')) return xLogo;
+    if (c.includes('twitter') || c.includes('x ')) return xLogo;
     if (c.includes('apple')) return appleLogo;
+    if (c.includes('gmx')) return gmxLogo;
+    if (c.includes('proxy')) return xproxyLogo;
+    if (c.includes('roblox')) return robloxLogo;
+    if (c.includes('yandex')) return yandexLogo;
+    if (c.includes('amazon')) return amazonLogo;
 
     // Premium brand SVGs from online Simple Icons CDN
     const simpleIconsMap = [
