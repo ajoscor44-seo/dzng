@@ -13,6 +13,9 @@ import netflixLogo from '../../assets/netflix.jpeg';
 import spotifyLogo from '../../assets/spotify.jpeg';
 import surfsharkLogo from '../../assets/surfshark.jpeg';
 import youtubeLogo from '../../assets/youtube.jpeg';
+import whatsappLogo from '../../assets/whatsapp.jpg';
+import xLogo from '../../assets/x.jpg';
+import appleLogo from '../../assets/apple.png';
 
 const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8px' }) => {
   const [error, setError] = useState(false);
@@ -22,10 +25,12 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('facebook') || c.includes('fb')) return 'linear-gradient(135deg, #1877F2 0%, #00f2fe 100%)';
     if (c.includes('instagram') || c.includes('ig')) return 'linear-gradient(135deg, #833AB4 0%, #FD1D1D 50%, #FCAF45 100%)';
     if (c.includes('tiktok') || c.includes('tt')) return 'linear-gradient(135deg, #010101 0%, #EE1D52 50%, #69C9D0 100%)';
-    if (c.includes('twitter') || c.includes('x')) return 'linear-gradient(135deg, #1DA1F2 0%, #7f00ff 100%)';
+    if (c.includes('twitter') || c.includes('x')) return 'linear-gradient(135deg, #000000 0%, #333333 100%)';
     if (c.includes('linkedin') || c.includes('link')) return 'linear-gradient(135deg, #0A66C2 0%, #00f2fe 100%)';
     if (c.includes('gmail') || c.includes('google')) return 'linear-gradient(135deg, #EA4335 0%, #FBBC05 100%)';
     if (c.includes('snapchat')) return 'linear-gradient(135deg, #FFFC00 0%, #f1c40f 100%)';
+    if (c.includes('whatsapp') || c.includes('wa')) return 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)';
+    if (c.includes('apple')) return 'linear-gradient(135deg, #555555 0%, #000000 100%)';
     return 'linear-gradient(135deg, var(--color-violet) 0%, var(--color-pink) 100%)';
   };
 
@@ -34,10 +39,12 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('facebook') || c.includes('fb')) return '📘';
     if (c.includes('instagram') || c.includes('ig')) return '📸';
     if (c.includes('tiktok') || c.includes('tt')) return '🎵';
-    if (c.includes('twitter') || c.includes('x')) return '🐦';
+    if (c.includes('twitter') || c.includes('x')) return '✖️';
     if (c.includes('linkedin') || c.includes('link')) return '💼';
     if (c.includes('gmail') || c.includes('google')) return '📧';
     if (c.includes('snapchat')) return '👻';
+    if (c.includes('whatsapp') || c.includes('wa')) return '💬';
+    if (c.includes('apple')) return '🍎';
     return '📱';
   };
 
@@ -51,6 +58,9 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('surfshark')) return surfsharkLogo;
     if (n.includes('claude')) return claudeLogo;
     if (n.includes('chatgpt') || n.includes('gpt')) return chatgptLogo;
+    if (c.includes('whatsapp') || c.includes('wa')) return whatsappLogo;
+    if (c.includes('twitter') || c.includes('x')) return xLogo;
+    if (c.includes('apple')) return appleLogo;
     return null;
   };
 
@@ -332,7 +342,12 @@ const SocialMediaLogs = () => {
     if (cat.includes('facebook') || cat.includes('fb')) return '📘';
     if (cat.includes('instagram') || cat.includes('ig')) return '📸';
     if (cat.includes('tiktok') || cat.includes('tt')) return '🎵';
-    if (cat.includes('twitter') || cat.includes('x')) return '🐦';
+    if (cat.includes('twitter') || cat.includes('x')) return '✖️';
+    if (cat.includes('linkedin') || cat.includes('link')) return '💼';
+    if (cat.includes('gmail') || cat.includes('google')) return '📧';
+    if (cat.includes('snapchat')) return '👻';
+    if (cat.includes('whatsapp') || cat.includes('wa')) return '💬';
+    if (cat.includes('apple')) return '🍎';
     return '📱';
   };
 

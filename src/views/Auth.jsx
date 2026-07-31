@@ -4,6 +4,7 @@ import { AppContext } from '../context/AppContext';
 import { supabase } from '../supabase';
 import posthog from '../posthog';
 import { Compass, Mail, Lock, User, Phone, CheckSquare, Square, AlertCircle, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import loginSocialImg from '../assets/login_social.jpg';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -138,27 +139,87 @@ const Auth = () => {
     <div style={{ 
       minHeight: '100vh', 
       width: '100%', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      padding: '24px',
+      display: 'flex',
       background: 'var(--bg-main)',
       position: 'relative'
     }}>
+      <style>{`
+        @media (max-width: 900px) {
+          .login-image-panel {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       {/* Back to Home Trigger */}
       <button 
         className="btn btn-secondary" 
         onClick={() => navigate('/')} 
-        style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 10, background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
+        style={{ position: 'absolute', top: '24px', right: '24px', display: 'flex', alignItems: 'center', gap: '6px', zIndex: 10, background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '14px', fontWeight: '600' }}
       >
         <ArrowLeft size={16} />
         Back to Home
       </button>
 
-      {/* Auth Main Card */}
-      <div className="glass-panel" style={{ 
-        width: '100%', 
-        maxWidth: '460px', 
+      {/* Left Side: Premium Image Panel (Hidden on Mobile) */}
+      <div className="login-image-panel" style={{ 
+        flex: 1.2, 
+        position: 'relative', 
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        padding: '60px',
+        borderRight: '1px solid rgba(255,255,255,0.05)'
+      }}>
+        {/* Background Image with Overlay */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundImage: `url(${loginSocialImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'brightness(0.65) contrast(1.05)'
+        }} />
+        
+        {/* Overlay gradient */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(to top, rgba(15, 10, 25, 0.95) 0%, rgba(15, 10, 25, 0.3) 100%)',
+          zIndex: 1
+        }} />
+
+        {/* Text Overlay */}
+        <div style={{ zIndex: 2, position: 'relative', maxWidth: '480px', textAlign: 'left' }}>
+          <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#fff', marginBottom: '16px', lineHeight: '1.2', fontFamily: 'var(--font-heading)' }}>
+            Instant Access to Premium Accounts & Services
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: '1.6', margin: 0 }}>
+            Deploy bulk logs, SMM panel campaigns, e-SIM travel bundles, and virtual phone numbers in one unified console dashboard.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side: Form Panel */}
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '60px 24px',
+        zIndex: 2
+      }}>
+        {/* Auth Main Card */}
+        <div className="glass-panel" style={{ 
+          width: '100%', 
+          maxWidth: '460px', 
         padding: '40px',
         display: 'flex',
         flexDirection: 'column',
@@ -409,6 +470,7 @@ const Auth = () => {
           )}
         </div>
 
+      </div>
       </div>
     </div>
   );
