@@ -304,13 +304,13 @@ serve(async (req) => {
 
               return {
                 id: p.id,
-                category: translateToEnglish(p.category?.title || "General"),
-                name: translateToEnglish(p.title),
+                category: p.category?.title || "General",
+                name: p.title,
                 slug: p.slug,
                 image: categoryImage,
                 price: (Number(p.price) || 0) * 25400,
                 stock: p.available_stock || 0,
-                description: translateToEnglish(p.title),
+                description: p.title,
                 preview: previewUrl
               };
             });
@@ -353,7 +353,7 @@ serve(async (req) => {
           const resData = await response.json();
           if (resData.success && resData.data) {
             const detail = {
-              description: translateToEnglish(resData.data.description || "")
+              description: resData.data.description || ""
             };
             return new Response(JSON.stringify({ success: true, detail }), {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
