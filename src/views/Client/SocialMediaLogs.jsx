@@ -76,6 +76,73 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('twitter') || c === 'x' || c.startsWith('x ') || c.includes('/x')) return xLogo;
     if (c.includes('apple')) return appleLogo;
 
+    // Local high-fidelity vector components for popular brands to guarantee 100% offline visual load
+    if (c.includes('instagram') || c.includes('ig')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '45px', height: '45px', fill: 'none', stroke: '#fff', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </div>
+      );
+    }
+
+    if (c.includes('tiktok') || c.includes('tt')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#010101' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '45px', height: '45px', fill: '#fff' }}>
+            <path d="M12.525.02c1.31.03 2.62.03 3.91.02.04 1.5.87 2.85 2.21 3.5v3.9c-1.35-.15-2.58-.87-3.32-1.98v6.86c-.03 3.52-2.88 6.35-6.4 6.35-3.52 0-6.38-2.83-6.4-6.35A6.4 6.4 0 0 1 8.93 6v4.06c-1.28.08-2.28 1.15-2.28 2.44 0 1.35 1.1 2.45 2.45 2.45s2.45-1.1 2.45-2.45V0h.97z" />
+          </svg>
+        </div>
+      );
+    }
+
+    if (c.includes('telegram')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0088cc 0%, #00a2ed 100%)' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '45px', height: '45px', fill: 'none', stroke: '#fff', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </div>
+      );
+    }
+
+    if (c.includes('gmail') || c.includes('google mail')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #ea4335 0%, #c5221f 100%)' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '42px', height: '42px', fill: 'none', stroke: '#fff', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
+      );
+    }
+
+    if (c.includes('linkedin')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0A66C2 0%, #0077b5 100%)' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '42px', height: '42px', fill: 'none', stroke: '#fff', strokeWidth: '2', strokeLinecap: 'round', strokeLinejoin: 'round' }}>
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+            <rect x="2" y="9" width="4" height="12"></rect>
+            <circle cx="4" cy="4" r="2"></circle>
+          </svg>
+        </div>
+      );
+    }
+
+    if (c.includes('snapchat')) {
+      return (
+        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FFFC00' }}>
+          <svg viewBox="0 0 24 24" style={{ width: '48px', height: '48px', fill: '#000' }}>
+            <path d="M12 2c-3.5 0-5.8 2.5-5.8 5.7 0 1.6.8 2.8 1.4 3.4.2.2.3.4.1.6-.3.3-1.1.8-1.7.9-.5.1-.7.4-.5.6.3.3 1.3.6 2 .4.3-.1.5.1.4.4-.2.8-.8 2.6-2.5 3.3-.4.2-.4.5-.1.6.9.3 2.1-.1 2.8-.5.2-.1.4 0 .5.2.5 1.1 1.7 2.4 3.4 2.4s2.9-1.3 3.4-2.4c.1-.2.3-.3.5-.2.7.4 1.9.8 2.8.5.3-.1.3-.4-.1-.6-1.7-.7-2.3-2.5-2.5-3.3-.1-.3.1-.5.4-.4.7.2 1.7-.1 2-.4.2-.2 0-.5-.5-.6-.6-.1-1.4-.6-1.7-.9-.2-.2-.1-.4.1-.6.6-.6 1.4-1.8 1.4-3.4 0-3.2-2.3-5.7-5.8-5.7z" />
+          </svg>
+        </div>
+      );
+    }
+
     // Premium brand SVGs from online Simple Icons CDN
     const simpleIconsMap = [
       { key: 'facebook', slug: 'facebook', bg: '1877F2' },
@@ -127,7 +194,36 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
 
   const fallbackImg = getFallbackImage(category, alt);
 
+  // 1. Try loading the image from the API first if present
+  if (src && !error) {
+    return (
+      <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
+        <img 
+          src={src} 
+          alt={alt} 
+          onError={() => setError(true)} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
+    );
+  }
+
+  // 2. Fall back to custom uploaded or online brand logo overrides
   if (fallbackImg) {
+    if (React.isValidElement(fallbackImg)) {
+      return (
+        <div style={{ 
+          width: '100%', 
+          height, 
+          borderRadius, 
+          overflow: 'hidden', 
+          marginBottom: '12px'
+        }}>
+          {fallbackImg}
+        </div>
+      );
+    }
+
     const isOnlineSvg = typeof fallbackImg === 'string' && fallbackImg.includes('simpleicons.org');
     const parts = isOnlineSvg ? fallbackImg.split('/') : [];
     const bgColorHex = isOnlineSvg && parts.length > 0 ? `#${parts[parts.length - 1]}` : 'transparent';
@@ -157,34 +253,22 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     );
   }
 
-  if (error || !src) {
-    return (
-      <div style={{ 
-        width: '100%', 
-        height, 
-        borderRadius, 
-        background: getGradient(category), 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        fontSize: height === '200px' ? '48px' : '32px',
-        boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
-        marginBottom: '12px',
-        opacity: 0.85
-      }}>
-        {getPlatformIcon(category)}
-      </div>
-    );
-  }
-
+  // 3. Absolute fallback: colored gradients + simple text emojis
   return (
-    <div style={{ width: '100%', height, borderRadius, overflow: 'hidden', marginBottom: '12px', background: 'rgba(255,255,255,0.02)' }}>
-      <img 
-        src={src} 
-        alt={alt} 
-        onError={() => setError(true)} 
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-      />
+    <div style={{ 
+      width: '100%', 
+      height, 
+      borderRadius, 
+      background: getGradient(category), 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      fontSize: height === '200px' ? '48px' : '32px',
+      boxShadow: 'inset 0 0 20px rgba(0,0,0,0.3)',
+      marginBottom: '12px',
+      opacity: 0.85
+    }}>
+      {getPlatformIcon(category)}
     </div>
   );
 };
