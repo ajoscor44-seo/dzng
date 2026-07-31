@@ -64,14 +64,16 @@ const ProductImage = ({ src, alt, category, height = '120px', borderRadius = '8p
     if (c.includes('surfshark')) return surfsharkLogo;
     if (n.includes('claude')) return claudeLogo;
     if (n.includes('chatgpt') || n.includes('gpt')) return chatgptLogo;
-    if (c.includes('whatsapp') || c.includes('wa')) return whatsappLogo;
-    if (c.includes('twitter') || c.includes('x ')) return xLogo;
-    if (c.includes('apple')) return appleLogo;
+    
     if (c.includes('gmx')) return gmxLogo;
-    if (c.includes('proxy')) return xproxyLogo;
+    if (c.includes('proxy') || c.includes('proxies')) return xproxyLogo;
     if (c.includes('roblox')) return robloxLogo;
     if (c.includes('yandex')) return yandexLogo;
     if (c.includes('amazon')) return amazonLogo;
+
+    if (c.includes('whatsapp') || c.includes('wa')) return whatsappLogo;
+    if (c.includes('twitter') || c === 'x' || c.startsWith('x ') || c.includes('/x')) return xLogo;
+    if (c.includes('apple')) return appleLogo;
 
     // Premium brand SVGs from online Simple Icons CDN
     const simpleIconsMap = [
