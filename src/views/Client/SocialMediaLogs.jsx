@@ -167,16 +167,25 @@ const SocialMediaLogs = () => {
     setLoading(false);
   };
 
-  const categories = ['All', ...new Set(logs.map(l => l.category))];
+  const categories = React.useMemo(() => {
+    const set = new Set(
+      logs
+        .map(l => l.category?.trim())
+        .filter(Boolean)
+    );
+    return ['All', ...[...set].sort()];
+  }, [logs]);
 
   const filteredLogs = logs.filter(l => {
-    if (activeCategory !== 'All' && l.category !== activeCategory) return false;
-    if (searchQuery && !l.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    const cat = l.category?.trim() || 'General';
+    const name = l.name || '';
+    if (activeCategory !== 'All' && cat.toLowerCase() !== activeCategory.toLowerCase()) return false;
+    if (searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
     const getScore = (log) => {
       let score = 0;
-      const text = `${log.name} ${log.category}`.toLowerCase();
+      const text = `${log.name || ''} ${log.category || ''}`.toLowerCase();
       if (text.includes('usa') || text.includes(' us ')) score += 10;
       if (text.includes('aged')) score += 5;
       if (text.includes('verified') || text.includes('official')) score += 5;
