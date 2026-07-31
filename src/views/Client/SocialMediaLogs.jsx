@@ -296,6 +296,7 @@ const SocialMediaLogs = () => {
   });
 
   console.log("DEBUG activeCategory:", activeCategory, "searchQuery:", searchQuery, "filteredLogs count:", filteredLogs.length, "logs count:", logs.length);
+  console.log("DEBUG filteredLogs first 5 items JSON:", JSON.stringify(filteredLogs.slice(0, 5).map(l => ({ name: l.name, category: l.category }))));
 
   const handleBuy = async (e) => {
     e.preventDefault();
@@ -832,8 +833,8 @@ const SocialMediaLogs = () => {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-          {filteredLogs.map(log => (
-            <div key={log.id} className="glass-panel hover-lift" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px', gap: '16px', position: 'relative', overflow: 'hidden' }}>
+          {filteredLogs.map((log, idx) => (
+            <div key={`${log.id}-${log.name}-${idx}`} className="glass-panel hover-lift" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '20px', gap: '16px', position: 'relative', overflow: 'hidden' }}>
               
               <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', background: 'radial-gradient(circle, rgba(171,71,252,0.15) 0%, rgba(0,0,0,0) 70%)', zIndex: 0 }}></div>
               
