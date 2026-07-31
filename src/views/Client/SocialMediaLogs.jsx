@@ -203,10 +203,10 @@ const SocialMediaLogs = () => {
     const fullName = `${name} ${desc} ${cat}`.toLowerCase();
 
     // 1. Category Filter
-    if (activeCategory !== 'All' && cat.toLowerCase() !== activeCategory.toLowerCase()) return false;
+    if (activeCategory && activeCategory !== 'All' && cat.toLowerCase() !== activeCategory.toLowerCase()) return false;
     
     // 2. Search Filter
-    if (searchQuery && !name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (searchQuery && !fullName.includes(searchQuery.toLowerCase().trim())) return false;
 
     // 3. Age Filter
     if (ageFilter === 'Aged') {
@@ -257,6 +257,8 @@ const SocialMediaLogs = () => {
     };
     return getScore(b) - getScore(a);
   });
+
+  console.log("DEBUG activeCategory:", activeCategory, "searchQuery:", searchQuery, "filteredLogs count:", filteredLogs.length, "logs count:", logs.length);
 
   const handleBuy = async (e) => {
     e.preventDefault();
@@ -594,24 +596,30 @@ const SocialMediaLogs = () => {
         {/* Row 2: Categories Carousel */}
         <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', width: '100%' }} className="hide-scrollbar">
           {categories.map(cat => (
-            <button
+            <div
               key={cat}
+              role="button"
+              tabIndex={0}
               onClick={() => setActiveCategory(cat)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveCategory(cat); }}
               style={{
                 padding: '8px 16px',
                 borderRadius: '20px',
                 border: `1px solid ${activeCategory === cat ? '#ab47fc' : 'rgba(255,255,255,0.1)'}`,
-                background: activeCategory === cat ? 'rgba(171,71,252,0.15)' : 'rgba(255,255,255,0.02)',
+                background: activeCategory === cat ? 'rgba(171,71,252,0.25)' : 'rgba(255,255,255,0.02)',
                 color: activeCategory === cat ? '#fff' : 'var(--text-secondary)',
                 fontSize: '13px',
                 fontWeight: activeCategory === cat ? '600' : '400',
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                userSelect: 'none',
+                display: 'inline-block'
               }}
             >
               {cat}
-            </button>
+            </div>
           ))}
         </div>
 
