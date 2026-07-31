@@ -258,7 +258,7 @@ serve(async (req) => {
           }
         }
 
-        // 2. Fetch listings (first page, up to 100 items)
+        // 2. Fetch page 1 first to get total pages count
         const response = await fetch(`${ACCSBULK_BASE_URL}/listings?per_page=100`, {
           method: "GET",
           headers: {
@@ -267,10 +267,38 @@ serve(async (req) => {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          if (data.success && Array.isArray(data.data)) {
-            // Map AccsBulk format to our frontend format
-            products = data.data.map((p: any) => {
+          const firstPageData = await response.json();
+          if (firstPageData.success && Array.isArray(firstPageData.data)) {
+            let rawProducts = [...firstPageData.data];
+            const lastPage = firstPageData.meta?.last_page || 1;
+
+            // Fetch remaining pages in parallel
+            if (lastPage > 1) {
+              const promises = [];
+              for (let p = 2; p <= lastPage; p++) {
+                promises.push(
+                  fetch(`${ACCSBULK_BASE_URL}/listings?per_page=100&page=${p}`, {
+                    method: "GET",
+                    headers: {
+                      "X-API-Key": ACCSBULK_API_KEY,
+                    },
+                  }).then(async (r) => {
+                    if (r.ok) {
+                      const resJson = await r.json();
+                      return resJson.data || [];
+                    }
+                    return [];
+                  })
+                );
+              }
+              const results = await Promise.all(promises);
+              results.forEach((pageData) => {
+                rawProducts = rawProducts.concat(pageData);
+              });
+            }
+
+            // Map all AccsBulk listings to our format
+            products = rawProducts.map((p: any) => {
               const categoryImage = (catImageMap[p.category?.id] || p.category?.image || "").replace(/ /g, "%20");
               const previewUrl = `https://accsbulk.com/listings/${p.slug}`;
 
@@ -280,7 +308,7 @@ serve(async (req) => {
                 name: translateToEnglish(p.title),
                 slug: p.slug,
                 image: categoryImage,
-                price: (Number(p.price) || 0) * 25400, // Convert USD to virtual VND base for client conversion
+                price: (Number(p.price) || 0) * 25400,
                 stock: p.available_stock || 0,
                 description: translateToEnglish(p.title),
                 preview: previewUrl
