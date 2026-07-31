@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { supabase } from '../supabase';
@@ -11,7 +11,14 @@ const Auth = () => {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
 
-  const { loginUser } = useContext(AppContext);
+  const { isLoggedIn, isAuthLoading } = useContext(AppContext);
+
+  useEffect(() => {
+    if (!isAuthLoading && isLoggedIn) {
+      navigate(from, { replace: true });
+    }
+  }, [isLoggedIn, isAuthLoading, navigate, from]);
+
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
