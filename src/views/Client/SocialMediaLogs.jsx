@@ -630,35 +630,64 @@ const SocialMediaLogs = () => {
           )}
         </div>
 
-        {/* Row 2: Categories Carousel */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', width: '100%' }} className="hide-scrollbar">
-          {categories.map(cat => (
-            <div
-              key={cat}
-              role="button"
-              tabIndex={0}
-              onClick={() => setActiveCategory(cat)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveCategory(cat); }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: `1px solid ${activeCategory === cat ? '#ab47fc' : 'rgba(255,255,255,0.1)'}`,
-                background: activeCategory === cat ? 'rgba(171,71,252,0.25)' : 'rgba(255,255,255,0.02)',
-                color: activeCategory === cat ? '#fff' : 'var(--text-secondary)',
-                fontSize: '13px',
-                fontWeight: activeCategory === cat ? '600' : '400',
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
+        {/* Row 2: Categories Carousel (Desktop) or Dropdown Selector (Mobile) */}
+        {isMobile ? (
+          <div style={{ width: '100%' }}>
+            <label style={{ fontSize: '11px', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px', fontWeight: 'bold', textTransform: 'uppercase' }}>Select Category</label>
+            <select
+              value={activeCategory}
+              onChange={(e) => setActiveCategory(e.target.value)}
+              className="form-input"
+              style={{ 
+                width: '100%', 
+                borderRadius: '12px', 
+                background: 'rgba(255,255,255,0.03)', 
+                border: '1px solid rgba(255,255,255,0.1)', 
+                color: '#fff', 
+                padding: '10px',
+                fontSize: '14px',
                 outline: 'none',
-                userSelect: 'none',
-                display: 'inline-block'
+                height: '42px',
+                cursor: 'pointer'
               }}
             >
-              {cat}
-            </div>
-          ))}
-        </div>
+              {categories.map(cat => (
+                <option key={cat} value={cat} style={{ background: '#120a22', color: '#fff' }}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', scrollbarWidth: 'none', width: '100%' }} className="hide-scrollbar">
+            {categories.map(cat => (
+              <div
+                key={cat}
+                role="button"
+                tabIndex={0}
+                onClick={() => setActiveCategory(cat)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveCategory(cat); }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: `1px solid ${activeCategory === cat ? '#ab47fc' : 'rgba(255,255,255,0.1)'}`,
+                  background: activeCategory === cat ? 'rgba(171,71,252,0.25)' : 'rgba(255,255,255,0.02)',
+                  color: activeCategory === cat ? '#fff' : 'var(--text-secondary)',
+                  fontSize: '13px',
+                  fontWeight: activeCategory === cat ? '600' : '400',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  outline: 'none',
+                  userSelect: 'none',
+                  display: 'inline-block'
+                }}
+              >
+                {cat}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Row 3: Advanced Filters Grid (Collapsible) */}
         {showAdvancedFilters && (
