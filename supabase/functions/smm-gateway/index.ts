@@ -41,7 +41,7 @@ serve(async (req) => {
       throw new Error('SMM_API_KEY is not configured on the backend')
     }
 
-    const url = 'https://the-owlet.com/api/v2'
+    const url = 'https://thekclaut.com/api/v2'
     const params = new URLSearchParams()
     params.append('key', apiKey)
     params.append('action', action)
