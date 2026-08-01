@@ -76,7 +76,7 @@ const LandingPage = () => {
           <span>eSIMs, Virtual SMS & SMM</span>
         </h1>
         <p className="landing-desc">
-          DiscountZar matches top-tier telecom access, verification tools, and shared subscription channels under a single premium dashboard. Fund in NGN/USD and deploy assets instantly.
+          DiscountZARNG matches top-tier telecom access, verification tools, and shared subscription channels under a single premium dashboard. Fund in NGN/USD and deploy assets instantly.
         </p>
         <div className="hero-buttons">
           <button className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '16px' }} onClick={() => navigate('/dashboard')}>

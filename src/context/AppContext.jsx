@@ -822,7 +822,7 @@ export const AppProvider = ({ children }) => {
   const [accountSubscriptions, setAccountSubscriptions] = useState(() => {
     const saved = localStorage.getItem('zp_accountSubs');
     return saved ? JSON.parse(saved) : [
-      { id: 'as-001', name: 'YouTube Premium (Shared)', email: 'discountzar.yt82@gmail.com', pass: 'DiscountZarPass45!', screen: 'Screen 2', expiry: new Date(Date.now() + 3600000 * 24 * 18).toLocaleDateString(), status: 'ACTIVE' }
+      { id: 'as-001', name: 'YouTube Premium (Shared)', email: 'discountzar.yt82@gmail.com', pass: 'DiscountZARNGPass45!', screen: 'Screen 2', expiry: new Date(Date.now() + 3600000 * 24 * 18).toLocaleDateString(), status: 'ACTIVE' }
     ];
   });
 
@@ -1193,7 +1193,7 @@ export const AppProvider = ({ children }) => {
     
     const serviceNick = sub.name.split(' ')[0].toLowerCase();
     const mockEmail = `discountzar.${serviceNick}${Math.floor(10 + Math.random() * 89)}@discountzar.ng`;
-    const mockPass = `DiscountZar$${Math.floor(1000 + Math.random() * 8999)}`;
+    const mockPass = `DiscountZARNG$${Math.floor(1000 + Math.random() * 8999)}`;
     const mockScreen = `Profile Screen ${Math.floor(1 + Math.random() * 4)}`;
 
     const newSub = {

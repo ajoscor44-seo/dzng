@@ -20,11 +20,11 @@ const corsHeaders = {
 const generateWelcomeEmail = (name: string) => `
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 28px;">Welcome to DiscountZar Plus! 🚀</h1>
+    <h1 style="color: #ab47fc; margin: 0; font-size: 28px;">Welcome to DiscountZARNG Plus! 🚀</h1>
   </div>
   <p style="font-size: 16px; color: #e2e8f0;">Hi ${name || 'there'},</p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
-    Thank you for joining DiscountZar! We're thrilled to have you on board.
+    Thank you for joining DiscountZARNG! We're thrilled to have you on board.
     You now have access to premium digital services, including shared subscriptions, SMS OTP numbers, eSIMs, and SMM Panel boosts.
   </p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
@@ -126,7 +126,7 @@ const generateVirtualAccountEmail = (name: string, bankName: string, accountNumb
   </div>
   
   <p style="font-size: 14px; color: #94a3b8; line-height: 1.5;">
-    Deposits sent to this account are credited to your DiscountZar wallet automatically within seconds.
+    Deposits sent to this account are credited to your DiscountZARNG wallet automatically within seconds.
   </p>
   
   <div style="text-align: center; margin: 30px 0;">
@@ -194,7 +194,7 @@ const generatePurchaseReceiptEmail = (method: string, amount: any, txId: string)
   <div style="text-align: center; margin-bottom: 20px;">
     <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Receipt for Purchase 🧾</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Thank you for your purchase on DiscountZar!</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Thank you for your purchase on DiscountZARNG!</p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0;">
     <table style="width: 100%; border-collapse: collapse;">
@@ -224,7 +224,7 @@ const generateRefundEmail = (amount: any, method: string, reference: string) => 
   <div style="text-align: center; margin-bottom: 20px;">
     <h1 style="color: #00f2fe; margin: 0; font-size: 24px;">Wallet Refunded Successfully 🔄</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">A refund has been credited back to your DiscountZar wallet.</p>
+  <p style="font-size: 16px; color: #e2e8f0;">A refund has been credited back to your DiscountZARNG wallet.</p>
   
   <div style="background: rgba(0, 242, 254, 0.05); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(0, 242, 254, 0.15);">
     <table style="width: 100%; border-collapse: collapse;">
@@ -356,7 +356,7 @@ serve(async (req) => {
         // Welcome Email
         recipientEmail = record.email;
         recipientName = record.username || record.full_name || "Valued Customer";
-        emailSubject = "Welcome to DiscountZar Plus!";
+        emailSubject = "Welcome to DiscountZARNG Plus!";
         emailHtml = generateWelcomeEmail(recipientName);
 
       } else if (table === "transactions") {
@@ -368,7 +368,7 @@ serve(async (req) => {
           
           if (record.type === "Deposit" && !isRefund) {
             // Funding Email
-            emailSubject = "Wallet Funded Successfully - DiscountZar";
+            emailSubject = "Wallet Funded Successfully - DiscountZARNG";
             emailHtml = generateFundingEmail(record.amount, record.id);
 
             // Also notify admins if this is a real deposit (not a welcome bonus)
@@ -395,7 +395,7 @@ serve(async (req) => {
                       "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                      from: `DiscountZar <${SENDER_EMAIL}>`,
+                      from: `DiscountZARNG <${SENDER_EMAIL}>`,
                       to: adminEmails,
                       subject: `[Admin Alert] User Wallet Funded: ₦${Number(record.amount).toLocaleString()}`,
                       html: adminEmailHtml
@@ -408,11 +408,11 @@ serve(async (req) => {
             }
           } else if (record.type === "Refund" || (record.type === "Deposit" && isRefund)) {
             // Refund Email
-            emailSubject = "Refund Credited Successfully - DiscountZar";
+            emailSubject = "Refund Credited Successfully - DiscountZARNG";
             emailHtml = generateRefundEmail(record.amount, record.method, record.id);
           } else if (record.type === "Purchase") {
             // Purchase Receipt Email
-            emailSubject = "Purchase Receipt - DiscountZar";
+            emailSubject = "Purchase Receipt - DiscountZARNG";
             emailHtml = generatePurchaseReceiptEmail(record.method, record.amount, record.id);
           }
         }
@@ -421,7 +421,7 @@ serve(async (req) => {
         const profile = await fetchUserProfile(record.user_id);
         if (profile && profile.email) {
           recipientEmail = profile.email;
-          emailSubject = "Your DiscountZar Order Receipt";
+          emailSubject = "Your DiscountZARNG Order Receipt";
           
           const planName = record.plan_name || record.service_name || record.package_name || "Digital Service";
           const cost = record.cost || record.price || 0;
@@ -443,7 +443,7 @@ serve(async (req) => {
         if (profile && profile.email) {
           recipientEmail = profile.email;
           recipientName = profile.username || profile.full_name || "Customer";
-          emailSubject = "Dedicated Funding Account Active - DiscountZar";
+          emailSubject = "Dedicated Funding Account Active - DiscountZARNG";
           emailHtml = generateVirtualAccountEmail(recipientName, record.bank_name, record.account_number, record.account_name);
         }
       }
@@ -472,7 +472,7 @@ serve(async (req) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: `DiscountZar <${SENDER_EMAIL}>`,
+          from: `DiscountZARNG <${SENDER_EMAIL}>`,
           to: recipientEmail,
           subject: emailSubject,
           html: emailHtml

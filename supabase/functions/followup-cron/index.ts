@@ -12,11 +12,11 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 const generateFollowUpEmail = (name: string) => `
 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Still Exploring DiscountZar?</h1>
+    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Still Exploring DiscountZARNG?</h1>
   </div>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">Hi ${name},</p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
-    We noticed you signed up for DiscountZar Plus recently, but haven't placed your first order yet! 
+    We noticed you signed up for DiscountZARNG Plus recently, but haven't placed your first order yet! 
   </p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
     Whether you're looking for cheap temporary SMS numbers for verification, premium social media accounts, or eSIM data for your next trip, we've got you covered at unbeatable prices.
@@ -40,7 +40,7 @@ const generateFollowUpEmail = (name: string) => `
   </div>
 
   <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 40px;">
-    You're receiving this because you signed up on DiscountZar.ng.
+    You're receiving this because you signed up on DiscountZARNG.
   </p>
 </div>
 `;
@@ -106,9 +106,9 @@ serve(async (req) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: `DiscountZar <${SENDER_EMAIL}>`,
+          from: `DiscountZARNG <${SENDER_EMAIL}>`,
           to: email,
-          subject: "Still exploring DiscountZar?",
+          subject: "Still exploring DiscountZARNG?",
           html: htmlBody
         })
       });
