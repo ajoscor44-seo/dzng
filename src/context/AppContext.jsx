@@ -534,7 +534,42 @@ export const AppProvider = ({ children }) => {
   const identifiedUserId = useRef(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    let isMounted = true;
+
+    // Check for existing session or handle PKCE flow before concluding auth is complete
+    const checkInitialSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        if (session) {
+          setIsLoggedIn(true);
+          setUser(session.user);
+          if (identifiedUserId.current !== session.user.id) {
+            posthog.identify(session.user.id, {
+              email: session.user.email,
+              name: session.user.user_metadata?.full_name,
+              username: session.user.user_metadata?.username,
+            });
+            identifiedUserId.current = session.user.id;
+          }
+        } else {
+          setIsLoggedIn(false);
+          setUser(null);
+          setIsAuthLoading(false);
+        }
+      } catch (err) {
+        console.error("Error retrieving initial session:", err);
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
+      }
+    };
+
+    checkInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isMounted) return;
+
       if (session) {
         const { user: authenticatedUser } = session;
 
@@ -559,11 +594,20 @@ export const AppProvider = ({ children }) => {
         }
         setIsLoggedIn(false);
         setUser(null);
-        setIsAuthLoading(false);
+        
+        // Prevent setting auth loading to false if we are currently parsing
+        // code/tokens in the URL from an OAuth redirect.
+        const hasAuthParams = window.location.search.includes('code=') || 
+                              window.location.hash.includes('access_token=') || 
+                              window.location.hash.includes('error=');
+        if (!hasAuthParams || event === 'SIGNED_OUT') {
+          setIsAuthLoading(false);
+        }
       }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
