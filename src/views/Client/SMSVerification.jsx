@@ -152,6 +152,10 @@ const SMSVerification = () => {
 
       if (server === 'server4') {
         if (!selectedCountry) return;
+        // Validate if selectedCountry belongs to Server 4 list (prevent mismatched API query flash)
+        const isValid = heroSmsCountries.some(c => c.id === selectedCountry);
+        if (!isValid) return;
+
         setIsLoadingServices(true);
         try {
           const res = await supabase.functions.invoke('herosms-gateway', {
@@ -212,8 +216,12 @@ const SMSVerification = () => {
 
       if (!selectedCountry) return;
       
-      setIsLoadingServices(true);
       if (server === 'server2') {
+        // Validate if selectedCountry belongs to Server 2 list (prevent mismatched API query flash)
+        const isValid = smsPoolShortTermCountries.some(c => c.ID === selectedCountry);
+        if (!isValid) return;
+
+        setIsLoadingServices(true);
         // Server 2 (SMSPool) fetching prices for selected country
         try {
           const res = await supabase.functions.invoke('smspool-gateway', {
@@ -247,8 +255,8 @@ const SMSVerification = () => {
         } catch (e) {
           console.error(e);
         }
+        setIsLoadingServices(false);
       }
-      setIsLoadingServices(false);
     };
     loadServices();
   }, [selectedCountry, server, textVerifiedServices, smsPoolShortTermServices, otpServices, exchangeRate, profitMarkup]);
