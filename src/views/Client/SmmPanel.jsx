@@ -156,13 +156,13 @@ const getPackagesForService = (srv) => {
       { label: 'SEO Ranking', qty: 10000, badge: 'Best Value', desc: 'Boost video search metrics', features: ['High Retention Watch Time', 'Algorithmic Search Push', 'Refill Included'] }
     ];
   }
-  if (id === 'smm-spot-streams-sim') {
+  if (id === 'smm-spot-streams') {
     return [
       { label: 'Single Boost', qty: 5000, badge: 'Royalty Safe', desc: 'Premium eligible plays', features: ['Premium Account Plays', 'Royalty-Eligible Streams', 'High Retention (90s+)'] },
       { label: 'Playlist Surge', qty: 20000, badge: 'Best Seller', desc: 'Playlist placement trigger', features: ['Global Direct Streams', 'Safe for Artist Accounts', 'Natural Play Pattern'] }
     ];
   }
-  if (id === 'smm-x-fol-sim') {
+  if (id === 'smm-x-fol') {
     return [
       { label: 'X Starter', qty: 1000, badge: 'Popular', desc: 'Build initial authority', features: ['Global Twitter Profiles', 'Safe Growth Speed', 'Zero Risk of Suspension'] },
       { label: 'X Authority', qty: 3000, badge: 'Best Value', desc: 'Achieve corporate clout', features: ['Premium Active Profiles', 'Organic Refill System', 'No Drop Guarantee'] }

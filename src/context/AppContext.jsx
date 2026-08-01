@@ -77,20 +77,22 @@ const initialEsimPackages = [
 ];
 
 const SMM_SERVICE_MAPPING = {
-  'smm-ig-fol-std': { apiServiceId: 7336, platform: 'Instagram', name: 'Instagram Followers [Standard - Safe - Fast]', pricePerThousandNgn: 2000 },
-  'smm-ig-fol-hq': { apiServiceId: 6453, platform: 'Instagram', name: 'Instagram Followers [High Quality - Non-Drop - Stable]', pricePerThousandNgn: 3000 },
-  'smm-ig-lik-hq': { apiServiceId: 6454, platform: 'Instagram', name: 'Instagram Likes [HQ - Instant Delivery]', pricePerThousandNgn: 600 },
-  'smm-tt-fol-hq': { apiServiceId: 6517, platform: 'TikTok', name: 'TikTok Followers [Real Profiles - Stable]', pricePerThousandNgn: 10500 },
-  'smm-tt-lik-fast': { apiServiceId: 6527, platform: 'TikTok', name: 'TikTok Likes [Fast Speed - High Quality]', pricePerThousandNgn: 800 },
-  'smm-tg-mem-hq': { apiServiceId: 6172, platform: 'Telegram', name: 'Telegram Members [HQ - Zero Drop]', pricePerThousandNgn: 1800 },
-  'smm-yt-sub-real': { apiServiceId: 7537, platform: 'YouTube', name: 'YouTube Subscribers [100% Real - Guaranteed]', pricePerThousandNgn: 65000 },
-  'smm-yt-vw-ads': { apiServiceId: 6498, platform: 'YouTube', name: 'YouTube Views [Stable - No Drop]', pricePerThousandNgn: 5500 },
+  'smm-ig-fol-std': { apiServiceId: 11943, platform: 'Instagram', name: 'Instagram Followers [Standard - Safe - Fast]', pricePerThousandNgn: 2000 },
+  'smm-ig-fol-hq': { apiServiceId: 11891, platform: 'Instagram', name: 'Instagram Followers [High Quality - Non-Drop - Stable]', pricePerThousandNgn: 3000 },
+  'smm-ig-lik-hq': { apiServiceId: 11631, platform: 'Instagram', name: 'Instagram Likes [HQ - Instant Delivery]', pricePerThousandNgn: 600 },
+  'smm-tt-fol-hq': { apiServiceId: 11969, platform: 'TikTok', name: 'TikTok Followers [Real Profiles - Stable]', pricePerThousandNgn: 10500 },
+  'smm-tt-lik-fast': { apiServiceId: 11634, platform: 'TikTok', name: 'TikTok Likes [Fast Speed - High Quality]', pricePerThousandNgn: 800 },
+  'smm-tg-mem-hq': { apiServiceId: 10531, platform: 'Telegram', name: 'Telegram Members [HQ - Zero Drop]', pricePerThousandNgn: 1800 },
+  'smm-yt-sub-real': { apiServiceId: 11138, platform: 'YouTube', name: 'YouTube Subscribers [100% Real - Guaranteed]', pricePerThousandNgn: 65000 },
+  'smm-yt-vw-ads': { apiServiceId: 11964, platform: 'YouTube', name: 'YouTube Views [Stable - No Drop]', pricePerThousandNgn: 5500 },
+  'smm-spot-streams': { apiServiceId: 11846, platform: 'Spotify', name: 'Spotify Premium Streams [USA Audience]', pricePerThousandNgn: 2500 },
+  'smm-x-fol': { apiServiceId: 11880, platform: 'X / Twitter', name: 'X (Twitter) Followers [Stable]', pricePerThousandNgn: 5000 },
 };
 
 const initialSmmServices = [
   // ── Instagram (Real API) ──
   {
-    id: 'smm-ig-fol-std', apiServiceId: 7336, platform: 'Instagram', category: 'Followers',
+    id: 'smm-ig-fol-std', apiServiceId: 11943, platform: 'Instagram', category: 'Followers',
     name: 'Instagram Followers (Standard)',
     pricePerThousandNgn: 2000, pricePerThousandUsd: 2.6, min: 100, max: 50000,
     description: 'Real-looking standard followers delivered at a safe organic drip-feed rate. Ideal for growing a new account without triggering algorithmic penalties.',
@@ -98,7 +100,7 @@ const initialSmmServices = [
     logo: 'Instagram'
   },
   {
-    id: 'smm-ig-fol-hq', apiServiceId: 6453, platform: 'Instagram', category: 'Followers',
+    id: 'smm-ig-fol-hq', apiServiceId: 11891, platform: 'Instagram', category: 'Followers',
     name: 'Instagram Followers (High Quality)',
     pricePerThousandNgn: 3000, pricePerThousandUsd: 4.0, min: 50, max: 20000,
     description: 'Premium high-retention followers from established accounts. Best for influencers and brands who need stable numbers that sustain long-term.',
@@ -106,7 +108,7 @@ const initialSmmServices = [
     logo: 'Instagram'
   },
   {
-    id: 'smm-ig-lik-hq', apiServiceId: 6454, platform: 'Instagram', category: 'Likes',
+    id: 'smm-ig-lik-hq', apiServiceId: 11631, platform: 'Instagram', category: 'Likes',
     name: 'Instagram Likes (Instant)',
     pricePerThousandNgn: 600, pricePerThousandUsd: 0.8, min: 50, max: 100000,
     description: 'High-quality instant likes from active Instagram profiles. Boosts your post into the explore feed algorithm and increases organic reach.',
@@ -115,7 +117,7 @@ const initialSmmServices = [
   },
   // ── TikTok (Real API) ──
   {
-    id: 'smm-tt-fol-hq', apiServiceId: 6517, platform: 'TikTok', category: 'Followers',
+    id: 'smm-tt-fol-hq', apiServiceId: 11969, platform: 'TikTok', category: 'Followers',
     name: 'TikTok Followers (Stable)',
     pricePerThousandNgn: 10500, pricePerThousandUsd: 14.0, min: 50, max: 10000,
     description: 'High-retention TikTok followers from real profiles. Excellent for reaching the 1K follower milestone for TikTok Live access and monetization.',
@@ -123,7 +125,7 @@ const initialSmmServices = [
     logo: 'TikTok'
   },
   {
-    id: 'smm-tt-lik-fast', apiServiceId: 6527, platform: 'TikTok', category: 'Likes',
+    id: 'smm-tt-lik-fast', apiServiceId: 11634, platform: 'TikTok', category: 'Likes',
     name: 'TikTok Video Likes (Fast)',
     pricePerThousandNgn: 800, pricePerThousandUsd: 1.0, min: 100, max: 500000,
     description: 'Fast-delivery TikTok likes that trigger the "For You Page" algorithm for viral momentum.',
@@ -132,7 +134,7 @@ const initialSmmServices = [
   },
   // ── Telegram (Real API) ──
   {
-    id: 'smm-tg-mem-hq', apiServiceId: 6172, platform: 'Telegram', category: 'Members',
+    id: 'smm-tg-mem-hq', apiServiceId: 10531, platform: 'Telegram', category: 'Members',
     name: 'Telegram Channel Members',
     pricePerThousandNgn: 1800, pricePerThousandUsd: 2.4, min: 100, max: 100000,
     description: 'Genuine-looking Telegram channel members with profile photos and usernames. Zero-drop guarantee.',
@@ -141,7 +143,7 @@ const initialSmmServices = [
   },
   // ── YouTube (Real API) ──
   {
-    id: 'smm-yt-sub-real', apiServiceId: 7537, platform: 'YouTube', category: 'Subscribers',
+    id: 'smm-yt-sub-real', apiServiceId: 11138, platform: 'YouTube', category: 'Subscribers',
     name: 'YouTube Subscribers (Active)',
     pricePerThousandNgn: 65000, pricePerThousandUsd: 86.0, min: 10, max: 5000,
     description: 'YouTube subscribers from active accounts. Helps cross the 1,000 sub threshold for partner program onboarding.',
@@ -149,30 +151,30 @@ const initialSmmServices = [
     logo: 'YouTube'
   },
   {
-    id: 'smm-yt-vw-ads', apiServiceId: 6498, platform: 'YouTube', category: 'Views',
+    id: 'smm-yt-vw-ads', apiServiceId: 11964, platform: 'YouTube', category: 'Views',
     name: 'YouTube High-Retention Views',
     pricePerThousandNgn: 5500, pricePerThousandUsd: 7.3, min: 1000, max: 500000,
     description: 'Ad-safe YouTube views delivered from diverse IPs and devices with realistic watch time patterns.',
     features: ['Ad-revenue safe', 'Watch time included', 'SEO ranking boost'],
     logo: 'YouTube'
   },
-  // ── Spotify (Simulated) ──
+  // ── Spotify (Real API) ──
   {
-    id: 'smm-spot-streams-sim', platform: 'Spotify', category: 'Streams',
+    id: 'smm-spot-streams', apiServiceId: 11846, platform: 'Spotify', category: 'Streams',
     name: 'Spotify Premium Music Plays',
-    pricePerThousandNgn: 1200, pricePerThousandUsd: 1.6, min: 1000, max: 1000000,
+    pricePerThousandNgn: 2500, pricePerThousandUsd: 3.3, min: 1000, max: 1000000,
     description: 'Premium royalty-eligible Spotify plays from active user slots. 100% safe for artist distribution accounts.',
     features: ['Royalties eligible', 'Premium account streams', 'High retention (90s+)'],
-    logo: 'Spotify', isSimulated: true
+    logo: 'Spotify'
   },
-  // ── X / Twitter (Simulated) ──
+  // ── X / Twitter (Real API) ──
   {
-    id: 'smm-x-fol-sim', platform: 'X / Twitter', category: 'Followers',
+    id: 'smm-x-fol', apiServiceId: 11880, platform: 'X / Twitter', category: 'Followers',
     name: 'X (Twitter) Active Followers',
-    pricePerThousandNgn: 9000, pricePerThousandUsd: 12.0, min: 100, max: 20000,
+    pricePerThousandNgn: 5000, pricePerThousandUsd: 6.6, min: 100, max: 20000,
     description: 'Real-looking global profiles to boost credibility. Safe delivery speed to prevent flag bans.',
     features: ['Global profiles', 'Safe organic growth', 'No drop guarantee'],
-    logo: 'Twitter', isSimulated: true
+    logo: 'Twitter'
   },
   // ── Facebook (Simulated) ──
   {
@@ -398,13 +400,31 @@ export const AppProvider = ({ children }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return parsed.map(item => {
-          const initial = initialSmmServices.find(i => i.id === item.id);
-          if (initial && initial.apiServiceId && !item.apiServiceId) {
-            return { ...item, apiServiceId: initial.apiServiceId };
+        const cleaned = parsed
+          .filter(item => initialSmmServices.some(i => i.id === item.id))
+          .map(item => {
+            const initial = initialSmmServices.find(i => i.id === item.id);
+            if (initial) {
+              return { 
+                ...item, 
+                apiServiceId: initial.apiServiceId,
+                platform: initial.platform,
+                category: initial.category,
+                name: initial.name,
+                isSimulated: initial.isSimulated,
+                logo: initial.logo
+              };
+            }
+            return item;
+          });
+
+        initialSmmServices.forEach(initial => {
+          if (!cleaned.some(c => c.id === initial.id)) {
+            cleaned.push(initial);
           }
-          return item;
         });
+
+        return cleaned;
       } catch (e) {
         return initialSmmServices;
       }
@@ -488,7 +508,9 @@ export const AppProvider = ({ children }) => {
           'smm-tt-lik-fast': 500,
           'smm-tg-mem-hq': 1200,
           'smm-yt-sub-real': 43000,
-          'smm-yt-vw-ads': 3600
+          'smm-yt-vw-ads': 3600,
+          'smm-spot-streams': 1789,
+          'smm-x-fol': 3666
         };
         const basePrice = wholesaleCosts[smm.id] || smm.pricePerThousandNgn / 1.5;
         const priceNgn = Math.round(basePrice * (1 + profitMarkup.smm / 100));
