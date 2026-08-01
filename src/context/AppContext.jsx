@@ -365,8 +365,7 @@ export const AppProvider = ({ children }) => {
   const [dbIsAdmin, setDbIsAdmin] = useState(false);  const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('zp_theme');
     if (saved) return saved;
-    // Use device preference; default to dark if no preference detected
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    return 'light';
   });
 
   const toggleTheme = () => {

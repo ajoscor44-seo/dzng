@@ -692,7 +692,7 @@ const SocialMediaLogs = () => {
                   <div className="skeleton-pulse" style={{ height: '16px', width: '40%', borderRadius: '4px' }} />
                 </div>
               ) : detailedDescription ? (
-                <div className="social-log-html-content" style={{ marginTop: 12, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', background: 'rgba(0,0,0,0.2)', padding: 12, borderRadius: 8, wordBreak: 'break-word' }}
+                <div className="social-log-html-content" style={{ marginTop: 12, fontSize: '13px', color: '#1a1a1a', lineHeight: '1.6', background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.08)', wordBreak: 'break-word' }}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(detailedDescription.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }} />
               ) : (
                 <div style={{ fontSize: '15px', color: 'var(--text-muted)' }}>No description available for this product.</div>
@@ -1070,7 +1070,7 @@ const SocialMediaLogs = () => {
                 
                 {log.description && (
                   <div 
-                    className="social-log-html-content"
+                    className="social-log-html-content-preview"
                     style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', wordBreak: 'break-word' }}
                     dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(log.description.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }}
                   />
@@ -1195,12 +1195,12 @@ const SocialMediaLogs = () => {
             </div>
 
             {/* Description Content */}
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h4 style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#ab47fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Product Details & Specification</h4>
+            <div style={{ background: '#ffffff', padding: '20px', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.08)', color: '#1a1a1a' }}>
+              <h4 style={{ margin: '0 0 12px 0', fontSize: '12px', color: '#483aac', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '800' }}>Product Details & Specification</h4>
               {previewModalLog.description ? (
                 <div 
                   className="social-log-html-content"
-                  style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', wordBreak: 'break-word' }}
+                  style={{ fontSize: '13px', color: '#1a1a1a', lineHeight: '1.6', wordBreak: 'break-word' }}
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewModalLog.description.replace(/color:\s*[^;"]+;?/gi, '').replace(/background(?:-color)?:\s*[^;"]+;?/gi, '')) }}
                 />
               ) : (

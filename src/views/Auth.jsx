@@ -256,11 +256,8 @@ const Auth = () => {
       }}>
         
         {/* Brand Header */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Compass size={32} style={{ color: 'var(--color-turquoise)' }} />
-            <span style={{ fontSize: '26px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--color-turquoise)', letterSpacing: '-0.03em' }}>discountzar.ng</span>
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' }}>
+          <img src="/logo.png" alt="ZAR Logo" style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '10px' }} />
           <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>
             {isLogin ? 'Access your digital services dashboard console' : 'Create an account to deploy instant digital assets'}
           </p>

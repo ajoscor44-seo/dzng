@@ -17,32 +17,43 @@ const corsHeaders = {
 
 // --- HTML Email Templates ---
 
+const logoHeaderHtml = `
+<div style="text-align: center; margin-bottom: 24px;">
+  <div style="display: inline-flex; flex-direction: column; align-items: center; justify-content: center; background: #4c3eb7; width: 48px; height: 48px; border-radius: 6px; color: #ffffff; font-family: 'Impact', 'Arial Black', sans-serif; font-size: 20px; font-weight: 900; font-style: italic; letter-spacing: -0.05em; position: relative; padding-top: 3px; box-sizing: border-box; flex-shrink: 0;">
+    <span style="color: #ffffff;">ZAR</span>
+    <div style="width: 24px; height: 3px; background: #000000; position: absolute; bottom: 6px; right: 6px;"></div>
+  </div>
+</div>
+`;
+
 const generateWelcomeEmail = (name: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 28px;">Welcome to DiscountZARNG Plus! 🚀</h1>
+    <h1 style="color: #fff; margin: 0; font-size: 28px;">Welcome to discountzar.ng Plus! 🚀</h1>
   </div>
   <p style="font-size: 16px; color: #e2e8f0;">Hi ${name || 'there'},</p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
-    Thank you for joining DiscountZARNG! We're thrilled to have you on board.
+    Thank you for joining discountzar.ng! We're thrilled to have you on board.
     You now have access to premium digital services, including shared subscriptions, SMS OTP numbers, eSIMs, and SMM Panel boosts.
   </p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
     To get started, you can generate your virtual PocketFi wallet and fund your account instantly.
   </p>
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #9333ea 0%, #ab47fc 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #483aac 0%, #6355d8 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
   </div>
   <p style="font-size: 14px; color: #94a3b8;">If you have any questions, simply reply to this email.</p>
 </div>
 `;
 
 const generateFundingEmail = (amount: any, reference: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #3bb75e; margin: 0; font-size: 24px;">Wallet Funded Successfully 💰</h1>
+    <h1 style="color: #10b981; margin: 0; font-size: 24px;">Wallet Funded Successfully 💰</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Your wallet has been successfully credited!</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Your wallet has been successfully credited on discountzar.ng!</p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0;">
     <p style="margin: 0 0 10px 0; color: #94a3b8;">Amount Credited</p>
@@ -52,19 +63,20 @@ const generateFundingEmail = (amount: any, reference: string) => `
   <p style="font-size: 14px; color: #94a3b8; margin: 5px 0;">Transaction Ref: ${reference}</p>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: #ab47fc; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">View Wallet</a>
+    <a href="https://discountzar.ng/dashboard" style="background: #483aac; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">View Wallet</a>
   </div>
 </div>
 `;
 
 const generateAdminFundingEmail = (userProfile: any, amount: any, method: any, reference: any) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">New Deposit Received 💰</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">New Deposit Received 💰</h1>
   </div>
   <p style="font-size: 16px; color: #e2e8f0;">Hello Admin,</p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
-    A user has successfully funded their wallet. Below are the transaction details:
+    A user has successfully funded their wallet on discountzar.ng. Below are the transaction details:
   </p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -77,7 +89,7 @@ const generateAdminFundingEmail = (userProfile: any, amount: any, method: any, r
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Amount:</td>
-        <td style="padding: 8px 0; color: #3bb75e; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">
+        <td style="padding: 8px 0; color: #10b981; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">
           ₦${Number(amount).toLocaleString()}
         </td>
       </tr>
@@ -93,15 +105,16 @@ const generateAdminFundingEmail = (userProfile: any, amount: any, method: any, r
   </div>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard/admin" style="background: linear-gradient(90deg, #9333ea 0%, #ab47fc 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Admin Console</a>
+    <a href="https://discountzar.ng/dashboard/admin" style="background: linear-gradient(90deg, #483aac 0%, #6355d8 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Admin Console</a>
   </div>
 </div>
 `;
 
 const generateVirtualAccountEmail = (name: string, bankName: string, accountNumber: string, accountName: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 25px;">
-    <h1 style="color: #00f2fe; margin: 0; font-size: 24px;">Dedicated Funding Account Active 🏦</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">Dedicated Funding Account Active 🏦</h1>
   </div>
   <p style="font-size: 16px; color: #e2e8f0;">Hi ${name || 'there'},</p>
   <p style="font-size: 16px; color: #e2e8f0; line-height: 1.6;">
@@ -116,7 +129,7 @@ const generateVirtualAccountEmail = (name: string, bankName: string, accountNumb
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Account Number:</td>
-        <td style="padding: 8px 0; color: #00f2fe; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; font-family: monospace; font-size: 16px;">${accountNumber}</td>
+        <td style="padding: 8px 0; color: #483aac; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; font-family: monospace; font-size: 16px;">${accountNumber}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8;">Account Name:</td>
@@ -126,25 +139,26 @@ const generateVirtualAccountEmail = (name: string, bankName: string, accountNumb
   </div>
   
   <p style="font-size: 14px; color: #94a3b8; line-height: 1.5;">
-    Deposits sent to this account are credited to your DiscountZARNG wallet automatically within seconds.
+    Deposits sent to this account are credited to your discountzar.ng wallet automatically within seconds.
   </p>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #00c6ff 0%, #00f2fe 100%); color: #000; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #483aac 0%, #6355d8 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
   </div>
 </div>
 `;
 
 const generateOtpRequestedEmail = (service: string, phone: string, server: string, cost: any) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Temporary OTP Number Assigned 📲</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">Temporary OTP Number Assigned 📲</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Your temporary SMS verification number is ready:</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Your temporary SMS verification number is ready on discountzar.ng:</p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
     <p style="margin: 0 0 10px 0; color: #94a3b8; font-size: 14px; text-transform: uppercase;">Your Temporary Number</p>
-    <p style="margin: 0; font-size: 26px; font-weight: bold; color: #ab47fc; font-family: monospace;">${phone}</p>
+    <p style="margin: 0; font-size: 26px; font-weight: bold; color: #483aac; font-family: monospace;">${phone}</p>
   </div>
   
   <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
@@ -159,7 +173,7 @@ const generateOtpRequestedEmail = (service: string, phone: string, server: strin
       </tr>
       <tr>
         <td style="padding: 6px 0; color: #94a3b8;">Cost:</td>
-        <td style="padding: 6px 0; color: #ab47fc; text-align: right; font-weight: bold;">₦${Number(cost).toLocaleString()}</td>
+        <td style="padding: 6px 0; color: #483aac; text-align: right; font-weight: bold;">₦${Number(cost).toLocaleString()}</td>
       </tr>
     </table>
   </div>
@@ -171,15 +185,16 @@ const generateOtpRequestedEmail = (service: string, phone: string, server: strin
 `;
 
 const generateOtpReceivedEmail = (service: string, phone: string, code: string, smsText: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #3bb75e; margin: 0; font-size: 24px;">SMS Code Received! 🎉</h1>
+    <h1 style="color: #10b981; margin: 0; font-size: 24px;">SMS Code Received! 🎉</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Your verification code for <strong>${service}</strong> (${phone}) has arrived:</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Your verification code for <strong>${service}</strong> (${phone}) has arrived on discountzar.ng:</p>
   
-  <div style="background: rgba(59, 183, 94, 0.08); border: 2px dashed #3bb75e; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
+  <div style="background: rgba(16, 185, 129, 0.08); border: 2px dashed #10b981; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
     <span style="font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 5px;">Verification Code</span>
-    <span style="font-size: 32px; font-weight: 800; color: #3bb75e; font-family: monospace; letter-spacing: 4px;">${code}</span>
+    <span style="font-size: 32px; font-weight: 800; color: #10b981; font-family: monospace; letter-spacing: 4px;">${code}</span>
   </div>
   
   <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);">
@@ -190,11 +205,12 @@ const generateOtpReceivedEmail = (service: string, phone: string, code: string, 
 `;
 
 const generatePurchaseReceiptEmail = (method: string, amount: any, txId: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Receipt for Purchase 🧾</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">Receipt for Purchase 🧾</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Thank you for your purchase on DiscountZARNG!</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Thank you for your purchase on discountzar.ng!</p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0;">
     <table style="width: 100%; border-collapse: collapse;">
@@ -204,7 +220,7 @@ const generatePurchaseReceiptEmail = (method: string, amount: any, txId: string)
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Amount Paid:</td>
-        <td style="padding: 8px 0; color: #ab47fc; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">₦${Number(amount).toLocaleString()}</td>
+        <td style="padding: 8px 0; color: #483aac; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">₦${Number(amount).toLocaleString()}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8;">Transaction Reference:</td>
@@ -214,23 +230,24 @@ const generatePurchaseReceiptEmail = (method: string, amount: any, txId: string)
   </div>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: #ab47fc; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+    <a href="https://discountzar.ng/dashboard" style="background: #483aac; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
   </div>
 </div>
 `;
 
 const generateRefundEmail = (amount: any, method: string, reference: string) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #00f2fe; margin: 0; font-size: 24px;">Wallet Refunded Successfully 🔄</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">Wallet Refunded Successfully 🔄</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">A refund has been credited back to your DiscountZARNG wallet.</p>
+  <p style="font-size: 16px; color: #e2e8f0;">A refund has been credited back to your discountzar.ng wallet.</p>
   
-  <div style="background: rgba(0, 242, 254, 0.05); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(0, 242, 254, 0.15);">
+  <div style="background: rgba(72, 58, 172, 0.05); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid rgba(72, 58, 172, 0.15);">
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
         <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Refund Amount:</td>
-        <td style="padding: 8px 0; color: #00f2fe; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">₦${Number(amount).toLocaleString()}</td>
+        <td style="padding: 8px 0; color: #483aac; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold;">₦${Number(amount).toLocaleString()}</td>
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1);">Reason / Service:</td>
@@ -244,7 +261,7 @@ const generateRefundEmail = (amount: any, method: string, reference: string) => 
   </div>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #00c6ff 0%, #00f2fe 100%); color: #000; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
+    <a href="https://discountzar.ng/dashboard" style="background: linear-gradient(90deg, #483aac 0%, #6355d8 100%); color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">Go to Dashboard</a>
   </div>
 </div>
 `;
@@ -261,7 +278,7 @@ const formatDetailsForEmail = (details: any): string => {
         .map(([key, value]) => `<strong>${key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}:</strong> ${value}`)
         .join("<br/>");
       return `<div style="margin-bottom: 12px; padding-bottom: 12px; ${idx < details.length - 1 ? 'border-bottom: 1px solid rgba(255,255,255,0.05);' : ''}">
-        <span style="color: #ab47fc; font-weight: bold;">Item #${itemNum}</span><br/>
+        <span style="color: #483aac; font-weight: bold;">Item #${itemNum}</span><br/>
         ${lines}
       </div>`;
     }).join("");
@@ -282,11 +299,12 @@ const formatDetailsForEmail = (details: any): string => {
 };
 
 const generateOrderEmail = (planName: string, quantity: number, cost: any, orderId: string, additionalDetails = null) => `
-<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0f0a18; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid #2d1a45;">
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0c; color: #fff; padding: 30px; border-radius: 12px; border: 1px solid rgba(72, 58, 172, 0.15);">
+  ${logoHeaderHtml}
   <div style="text-align: center; margin-bottom: 20px;">
-    <h1 style="color: #ab47fc; margin: 0; font-size: 24px;">Order Notification 🛒</h1>
+    <h1 style="color: #483aac; margin: 0; font-size: 24px;">Order Notification 🛒</h1>
   </div>
-  <p style="font-size: 16px; color: #e2e8f0;">Your order has been placed successfully!</p>
+  <p style="font-size: 16px; color: #e2e8f0;">Your order has been placed successfully on discountzar.ng!</p>
   
   <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin: 20px 0;">
     <table style="width: 100%; border-collapse: collapse;">
@@ -300,14 +318,14 @@ const generateOrderEmail = (planName: string, quantity: number, cost: any, order
       </tr>
       <tr>
         <td style="padding: 8px 0; color: #94a3b8;">Total Cost:</td>
-        <td style="padding: 8px 0; color: #ab47fc; text-align: right; font-weight: bold;">₦${Number(cost).toLocaleString()}</td>
+        <td style="padding: 8px 0; color: #483aac; text-align: right; font-weight: bold;">₦${Number(cost).toLocaleString()}</td>
       </tr>
     </table>
   </div>
   
   ${additionalDetails ? `
-  <div style="background: rgba(171, 71, 252, 0.1); border: 1px solid rgba(171, 71, 252, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-    <h3 style="margin: 0 0 10px 0; color: #ab47fc; font-size: 14px; text-transform: uppercase;">Order Details</h3>
+  <div style="background: rgba(72, 58, 172, 0.1); border: 1px solid rgba(72, 58, 172, 0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <h3 style="margin: 0 0 10px 0; color: #483aac; font-size: 14px; text-transform: uppercase;">Order Details</h3>
     <div style="margin: 0; color: #e2e8f0; font-family: sans-serif; font-size: 13px; line-height: 1.5;">${formatDetailsForEmail(additionalDetails)}</div>
   </div>
   ` : ''}
@@ -315,7 +333,7 @@ const generateOrderEmail = (planName: string, quantity: number, cost: any, order
   <p style="font-size: 14px; color: #94a3b8; margin: 5px 0;">Order ID: ${orderId}</p>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="https://discountzar.ng/dashboard" style="background: #ab47fc; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">View Order History</a>
+    <a href="https://discountzar.ng/dashboard" style="background: #483aac; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; display: inline-block;">View Order History</a>
   </div>
 </div>
 `;
@@ -356,7 +374,7 @@ serve(async (req) => {
         // Welcome Email
         recipientEmail = record.email;
         recipientName = record.username || record.full_name || "Valued Customer";
-        emailSubject = "Welcome to DiscountZARNG Plus!";
+        emailSubject = "Welcome to discountzar.ng Plus!";
         emailHtml = generateWelcomeEmail(recipientName);
 
       } else if (table === "transactions") {
@@ -368,7 +386,7 @@ serve(async (req) => {
           
           if (record.type === "Deposit" && !isRefund) {
             // Funding Email
-            emailSubject = "Wallet Funded Successfully - DiscountZARNG";
+            emailSubject = "Wallet Funded Successfully - discountzar.ng";
             emailHtml = generateFundingEmail(record.amount, record.id);
 
             // Also notify admins if this is a real deposit (not a welcome bonus)
@@ -395,7 +413,7 @@ serve(async (req) => {
                       "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                      from: `DiscountZARNG <${SENDER_EMAIL}>`,
+                      from: `discountzar.ng <${SENDER_EMAIL}>`,
                       to: adminEmails,
                       subject: `[Admin Alert] User Wallet Funded: ₦${Number(record.amount).toLocaleString()}`,
                       html: adminEmailHtml
@@ -408,11 +426,11 @@ serve(async (req) => {
             }
           } else if (record.type === "Refund" || (record.type === "Deposit" && isRefund)) {
             // Refund Email
-            emailSubject = "Refund Credited Successfully - DiscountZARNG";
+            emailSubject = "Refund Credited Successfully - discountzar.ng";
             emailHtml = generateRefundEmail(record.amount, record.method, record.id);
           } else if (record.type === "Purchase") {
             // Purchase Receipt Email
-            emailSubject = "Purchase Receipt - DiscountZARNG";
+            emailSubject = "Purchase Receipt - discountzar.ng";
             emailHtml = generatePurchaseReceiptEmail(record.method, record.amount, record.id);
           }
         }
@@ -421,7 +439,7 @@ serve(async (req) => {
         const profile = await fetchUserProfile(record.user_id);
         if (profile && profile.email) {
           recipientEmail = profile.email;
-          emailSubject = "Your DiscountZARNG Order Receipt";
+          emailSubject = "Your discountzar.ng Order Receipt";
           
           const planName = record.plan_name || record.service_name || record.package_name || "Digital Service";
           const cost = record.cost || record.price || 0;
@@ -443,7 +461,7 @@ serve(async (req) => {
         if (profile && profile.email) {
           recipientEmail = profile.email;
           recipientName = profile.username || profile.full_name || "Customer";
-          emailSubject = "Dedicated Funding Account Active - DiscountZARNG";
+          emailSubject = "Dedicated Funding Account Active - discountzar.ng";
           emailHtml = generateVirtualAccountEmail(recipientName, record.bank_name, record.account_number, record.account_name);
         }
       }
@@ -472,7 +490,7 @@ serve(async (req) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          from: `DiscountZARNG <${SENDER_EMAIL}>`,
+          from: `discountzar.ng <${SENDER_EMAIL}>`,
           to: recipientEmail,
           subject: emailSubject,
           html: emailHtml

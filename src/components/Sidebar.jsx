@@ -67,9 +67,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       )}
 
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-logo sidebar-logo--hide-mobile-auth">
-          <Compass size={28} className="pulse-glow-cyan" style={{ color: 'var(--color-turquoise)' }} />
-          <span className="logo-text">discountzar.ng</span>
+        <div className="sidebar-logo sidebar-logo--hide-mobile-auth" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '32px 32px 20px', borderBottom: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img src="/logo.png" alt="ZAR Logo" style={{ width: '64px', height: '64px', objectFit: 'contain', borderRadius: '12px', flexShrink: 0 }} />
+          </div>
         </div>
 
         <ul className="sidebar-menu">
@@ -82,11 +83,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <div
                   onClick={() => handleNavClick(item.id, item.external, item.url)}
                   className={`sidebar-link ${isSelected ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '12px 16px', textDecoration: 'none' }}
                 >
-                  <Icon size={20} style={{ flexShrink: 0 }} />
+                  <Icon size={18} style={{ flexShrink: 0 }} />
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: '13.5px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '600' }}>{item.label}</span>
+                    <span style={{ fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: isSelected ? '700' : '500', fontFamily: 'var(--font-label)' }}>{item.label}</span>
                     {item.id === 'subs' && (
                       <span style={{ 
                         fontSize: '7.5px', 
@@ -132,55 +133,50 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 <div
                   onClick={() => handleNavClick('admin')}
                   className={`sidebar-link pink ${activeTab === 'admin' ? 'active' : ''}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px' }}
                 >
-                  <ShieldCheck size={20} style={{ color: 'var(--color-pink)' }} />
-                  <span style={{ color: 'var(--color-pink)', fontWeight: '600' }}>Admin Panel</span>
+                  <ShieldCheck size={18} style={{ color: 'var(--color-pink)' }} />
+                  <span style={{ color: 'var(--color-pink)', fontWeight: '700', fontSize: '14px', fontFamily: 'var(--font-label)' }}>Admin Panel</span>
                 </div>
               </li>
-              {/* 
-              <li className="sidebar-item">
-                <div
-                  onClick={() => handleNavClick('test')}
-                  className={`sidebar-link ${activeTab === 'test' ? 'active' : ''}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%' }}
-                >
-                  <Key size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
-                  <span style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--color-turquoise)' }}>
-                    VPN & AppSuite OTP (/test)
-                  </span>
-                </div>
-              </li>
-              */}
             </>
           )}
         </ul>
 
-        <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-green)' }}></div>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Server Status: Live</span>
-          </div>
-          {user && (
-            <>
-              <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                <span style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }} title={user.email}>
-                  User: {user.email}
-                </span>
-              </div>
-              <button 
+        <div style={{ padding: '20px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <button 
+            onClick={() => handleNavClick('wallet')}
+            className="primary-gradient" 
+            style={{ width: '100%', padding: '12px', border: 'none', borderRadius: '8px', color: '#ffffff', fontWeight: '600', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s ease', fontFamily: 'var(--font-label)', textAlign: 'center' }}
+          >
+            Add Funds
+          </button>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div 
+              onClick={() => handleNavClick('profile')}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', transition: 'all 0.2s ease', fontFamily: 'var(--font-label)' }}
+              onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'}
+              onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              <Settings size={14} />
+              <span>Settings</span>
+            </div>
+            {user && (
+              <div 
                 onClick={() => {
                   logoutUser();
                   navigate('/');
                 }}
-                className="btn btn-secondary" 
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '8px', fontSize: '13px' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', transition: 'all 0.2s ease', fontFamily: 'var(--font-label)' }}
+                onMouseOver={e => e.currentTarget.style.color = 'var(--color-pink)'}
+                onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
               >
-                <LogOut size={16} />
-                <span>Log Out</span>
-              </button>
-            </>
-          )}
+                <LogOut size={14} />
+                <span>Logout</span>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </>

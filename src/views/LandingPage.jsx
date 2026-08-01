@@ -66,295 +66,371 @@ const LandingPage = () => {
       <LandingNav />
 
       {/* Hero Section */}
-      <section className="landing-hero animate-slide-in">
-        <div className="hero-tag">
-          <Zap size={14} style={{ marginRight: '6px' }} />
-          All-In-One Digital Services Hub
-        </div>
-        <h1 className="landing-title">
-          Discount Shared Services, <br />
-          <span>eSIMs, Virtual SMS & SMM</span>
-        </h1>
-        <p className="landing-desc">
-          DiscountZARNG matches top-tier telecom access, verification tools, and shared subscription channels under a single premium dashboard. Fund in NGN/USD and deploy assets instantly.
-        </p>
-        <div className="hero-buttons">
-          <button className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '16px' }} onClick={() => navigate('/dashboard')}>
-            Enter Dashboard <ArrowRight size={18} style={{ marginLeft: '4px' }} />
-          </button>
-          <button className="btn btn-secondary" style={{ padding: '14px 28px', fontSize: '16px' }} onClick={() => navigate('/dashboard/otp')}>
-            Get Free OTP Trial
-          </button>
+      <section className="landing-hero hero-subtle-gradient animate-slide-in" style={{ minHeight: '700px', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '80px 20px', borderBottom: '1px solid var(--border-color)', width: '100%', maxWidth: 'none', margin: '0' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', textAlign: 'center', width: '100%' }}>
+          <div className="hero-tag" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--color-turquoise)', background: 'rgba(72, 58, 172, 0.05)', border: '1px solid rgba(72, 58, 172, 0.1)', padding: '6px 16px', borderRadius: '4px', marginBottom: '32px' }}>
+            <Zap size={14} />
+            <span style={{ fontSize: '12px', letterSpacing: '0.15em', fontWeight: '700', textTransform: 'uppercase', fontFamily: 'var(--font-label)' }}>All-In-One Digital Services Hub</span>
+          </div>
+          <h1 className="landing-title" style={{ fontSize: '56px', lineHeight: '1.2', fontWeight: '800', fontFamily: 'var(--font-heading)', marginBottom: '32px', color: 'var(--text-primary)' }}>
+            Discount Shared Services, <br />
+            <span style={{ color: 'var(--color-turquoise)', fontStyle: 'italic' }}>eSIMs, Virtual SMS & SMM</span>
+          </h1>
+          <p className="landing-desc" style={{ fontSize: '18px', color: 'var(--text-secondary)', maxWidth: '680px', margin: '0 auto 40px', lineHeight: '1.7', fontFamily: 'var(--font-sans)' }}>
+            DiscountZARNG matches top-tier telecom access, verification tools, and shared subscription channels under a single premium dashboard. Fund in NGN/USD and deploy assets instantly.
+          </p>
+          <div className="hero-buttons" style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '80px', flexWrap: 'wrap' }}>
+            <button className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--color-turquoise)', border: 'none', color: '#fff', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+              Enter Dashboard <ArrowRight size={18} style={{ marginLeft: '4px' }} />
+            </button>
+            <button className="btn btn-secondary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', background: 'var(--bg-btn-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/dashboard/otp')}>
+              Get Free OTP Trial
+            </button>
+          </div>
+
+          {/* Integrated Stats Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '32px', maxWidth: '800px', margin: '0 auto', borderTop: '1px solid var(--border-color)', paddingTop: '40px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>99.9%</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>SMS Uptime</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>150+</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Countries</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>3.2M+</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Orders</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>&lt; 5s</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Delivery</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Core Features Grid */}
-      <section style={{ padding: '0 20px 80px' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '12px', fontFamily: 'var(--font-heading)' }}>
-          Explore Our Suite of Digital Tools
-        </h2>
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 40px', lineHeight: '1.6' }}>
-          Instant setup, transparent pricing, and comprehensive APIs.
-        </p>
+      {/* Service Suite Section */}
+      <section style={{ padding: '96px 20px', background: 'var(--bg-main)' }} id="services">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <h2 style={{ fontSize: '36px', marginBottom: '16px', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>
+              Explore Our Suite of Digital Tools
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
+              Instant setup, transparent pricing, and comprehensive APIs tailored for digital entrepreneurs.
+            </p>
+          </div>
 
-        <div className="features-grid">
-          {features.map((feat, idx) => {
-            const Icon = feat.icon;
-            return (
-              <div 
-                key={idx} 
-                className="glass-panel interactive" 
-                style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-              >
-                <div className="feature-icon-box" style={{ background: `rgba(${feat.color === 'var(--color-pink)' ? '255, 0, 127' : feat.color === 'var(--color-turquoise)' ? '0, 242, 254' : '127, 0, 255'}, 0.1)` }}>
-                  <Icon size={26} style={{ color: feat.color }} />
-                </div>
-                <h3 style={{ marginTop: '20px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {feat.title}
-                  {feat.action === 'esim' && !dbIsAdmin && (
-                    <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.1)', color: 'var(--text-secondary)', padding: '2px 6px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: '700' }}>
-                      Coming Soon
-                    </span>
-                  )}
-                </h3>
-                <p>{feat.desc}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
+            {features.map((feat, idx) => {
+              const Icon = feat.icon;
+              return (
                 <div 
-                  className="learn-more" 
-                  style={{ color: feat.color, cursor: 'pointer' }}
-                  onClick={() => {
-                    if (feat.action === 'subs') {
-                      window.open('https://www.discountzar.com/marketplace', '_blank');
-                    } else {
-                      navigate(`/dashboard/${feat.action}`);
-                    }
-                  }}
+                  key={idx} 
+                  className="editorial-card" 
+                  style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '32px', borderRadius: '4px' }}
                 >
-                  Configure Service <ArrowRight size={14} />
+                  <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'var(--bg-btn-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-turquoise)', marginBottom: '24px' }}>
+                    <Icon size={24} />
+                  </div>
+                  <h3 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+                    {feat.title}
+                    {feat.action === 'esim' && !dbIsAdmin && (
+                      <span style={{ fontSize: '10px', background: 'rgba(72, 58, 172, 0.08)', color: 'var(--color-turquoise)', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', fontWeight: '700', fontFamily: 'var(--font-label)' }}>
+                        Coming Soon
+                      </span>
+                    )}
+                  </h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '32px', flexGrow: 1 }}>
+                    {feat.desc}
+                  </p>
+                  <div 
+                    style={{ color: 'var(--color-turquoise)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: 'var(--font-label)' }}
+                    onClick={() => {
+                      if (feat.action === 'subs') {
+                        window.open('https://www.discountzar.com/marketplace', '_blank');
+                      } else {
+                        navigate(`/dashboard/${feat.action}`);
+                      }
+                    }}
+                  >
+                    Configure Service <ArrowRight size={14} style={{ marginLeft: '4px' }} />
+                  </div>
                 </div>
+              );
+            })}
+
+            {/* Featured Image */}
+            <div className="editorial-card" style={{ position: 'relative', minHeight: '300px', borderRadius: '4px', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'rgba(72, 58, 172, 0.25)', mixBlendMode: 'multiply', zIndex: 1 }} />
+              <div style={{ position: 'absolute', bottom: 0, left: 0, padding: '32px', zIndex: 2, width: '100%', background: 'linear-gradient(to top, rgba(10, 9, 14, 0.9) 0%, rgba(10, 9, 14, 0) 100%)' }}>
+                <p style={{ color: '#ffffff', fontSize: '18px', fontWeight: '700', marginBottom: '4px', fontFamily: 'var(--font-heading)' }}>Advanced Management</p>
+                <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', margin: 0, fontFamily: 'var(--font-sans)' }}>Unified control panel for all digital assets.</p>
               </div>
-            );
-          })}
-        </div>
-
-
-      </section>
-
-      {/* How It Works Section */}
-      <section style={{ padding: '80px 20px', background: 'rgba(0,0,0,0.015)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '12px', fontFamily: 'var(--font-heading)' }}>
-            Seamless 4-Step Process
-          </h2>
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 50px', lineHeight: '1.6' }}>
-            No physical complications or manual sign-off delays. Experience high-speed automated provisioning.
-          </p>
-
-          <div className="process-grid">
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '64px', fontWeight: '900', opacity: 0.05, fontFamily: 'var(--font-heading)' }}>01</div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0, 242, 254, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Layers size={20} style={{ color: 'var(--color-turquoise)' }} />
-              </div>
-              <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Fund Wallet</h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                Deposit funds instantly using secure automated virtual bank transfers, or Tether (USDT) cryptocurrency (Binance / Bybit). Your balance updates instantly.
-              </p>
-            </div>
-
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '64px', fontWeight: '900', opacity: 0.05, fontFamily: 'var(--font-heading)' }}>02</div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(127, 0, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Layers size={20} style={{ color: 'var(--color-violet)' }} />
-              </div>
-              <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Choose Service</h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                Select from our extensive catalog of global services: buy shared premium subscription slots, request a temporary one-time OTP verification number, configure travel eSIM data profiles, purchase high-refill SMM reseller boost packages, or re-buy and reuse verification numbers.
-              </p>
-            </div>
-
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '64px', fontWeight: '900', opacity: 0.05, fontFamily: 'var(--font-heading)' }}>03</div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255, 0, 127, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Layers size={20} style={{ color: 'var(--color-pink)' }} />
-              </div>
-              <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Instant Delivery</h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                Our backend automates provisioning. eSIM QR profiles are generated on the spot, verification SMS arrives in real-time on our custom dashboard panels, and shared account details are issued securely for immediate login.
-              </p>
-            </div>
-
-            <div className="glass-panel" style={{ position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '64px', fontWeight: '900', opacity: 0.05, fontFamily: 'var(--font-heading)' }}>04</div>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0, 255, 135, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                <Layers size={20} style={{ color: 'var(--color-green)' }} />
-              </div>
-              <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>Manage Telemetry</h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                Utilize the Client Console telemetry to monitor data usage, read incoming messages, extend number rentals, or track SMM campaign completion status. Everything is centralized in one simple premium dashboard.
-              </p>
+              <div style={{ position: 'absolute', inset: 0, backgroundPosition: 'center', backgroundSize: 'cover', backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuBXDV8UV-VGiZlRMH_MdLKd6n2r9Gbmw99MratWL3sfcwUX4DiYbfFtYTmk74Zz1DOhKprPnAbWTCot_RLteVGK2HHmPGTdoqxp_eQldJ9vMeOxl46nBgx9ZTRpCDiwOTP1aAS-Rf0GHDkx7Gd6RKbSeXhumLncJNGwbesTPbNAaRERXx0WWNcBk191yt-CCpeICDuwvt19_c2N7uoz2yAcJl48xk39EFB2rLby0e_aj-79yTgKxreh')` }} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Key Advantages */}
-      <section style={{ padding: '80px 20px', borderBottom: '1px solid var(--border-color)' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '12px', fontFamily: 'var(--font-heading)' }}>
-            Engineered For High-Performance
-          </h2>
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 50px', lineHeight: '1.6' }}>
-            A custom infrastructure built to replace legacy digital vending with high reliability.
-          </p>
+      {/* Process Section */}
+      <section style={{ padding: '96px 20px', background: 'var(--bg-btn-secondary)', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)' }} id="process">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <h2 style={{ fontSize: '36px', marginBottom: '16px', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>
+              Seamless 4-Step Process
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
+              No physical complications or manual sign-off delays. Experience automated provisioning.
+            </p>
+          </div>
 
-          <div className="advantages-grid">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Check size={14} style={{ color: 'var(--color-green)' }} />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '16px', marginBottom: '6px' }}>Physical SIM Card Routing</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                    Unlike low-cost VOIP providers that get flagged by web platforms, our temporary OTP and number rental systems route traffic through physical SIM pools to ensure 100% verification success on services like Google, Telegram, and WhatsApp.
-                  </p>
-                </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '32px' }}>
+            <div className="editorial-step-card" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '56px', fontWeight: '800', fontStyle: 'italic', opacity: 0.1, color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>1</div>
+              <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'rgba(72, 58, 172, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+                <Layers size={22} style={{ color: 'var(--color-turquoise)' }} />
               </div>
-
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Check size={14} style={{ color: 'var(--color-green)' }} />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '16px', marginBottom: '6px' }}>Reseller-Grade SMM Panel</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                    We plug directly into high-speed SMM reseller API backbones. Get standard-grade and high-quality non-drop followers, channel members, and video views with lifetime refill warranties at wholesale rates.
-                  </p>
-                </div>
-              </div>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>Fund Wallet</h4>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                Deposit funds instantly using secure automated transfers or Tether (USDT).
+              </p>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Check size={14} style={{ color: 'var(--color-green)' }} />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '16px', marginBottom: '6px' }}>Zero-Roaming eSIM Travel Profiles</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                    Provision instant data profiles spanning 85+ countries. Scan the QR code or key in SM-DP+ activation codes to secure local connectivity. Avoid expensive roaming charges and maintain global high-speed data.
-                  </p>
-                </div>
+            <div className="editorial-step-card" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '56px', fontWeight: '800', fontStyle: 'italic', opacity: 0.1, color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>2</div>
+              <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'rgba(72, 58, 172, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+                <Layers size={22} style={{ color: 'var(--color-turquoise)' }} />
               </div>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>Choose Service</h4>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                Select from our catalog of global services and eSIM profiles.
+              </p>
+            </div>
 
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Check size={14} style={{ color: 'var(--color-green)' }} />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: '16px', marginBottom: '6px' }}>Instant Dual-Billing System</h4>
-                  <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>
-                    Switch your entire client interface between Naira (₦) and US Dollars ($) on the fly. Check precise real-time conversions backed by simulated bank gateways and secure transaction ledgers.
-                  </p>
-                </div>
+            <div className="editorial-step-card" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '56px', fontWeight: '800', fontStyle: 'italic', opacity: 0.1, color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>3</div>
+              <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'rgba(72, 58, 172, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+                <Layers size={22} style={{ color: 'var(--color-turquoise)' }} />
               </div>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>Instant Delivery</h4>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                Our backend automates provisioning for immediate access.
+              </p>
+            </div>
+
+            <div className="editorial-step-card" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: '16px', right: '20px', fontSize: '56px', fontWeight: '800', fontStyle: 'italic', opacity: 0.1, color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>4</div>
+              <div style={{ width: '48px', height: '48px', borderRadius: '4px', background: 'rgba(72, 58, 172, 0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+                <Layers size={22} style={{ color: 'var(--color-turquoise)' }} />
+              </div>
+              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '12px', color: 'var(--text-primary)' }}>Manage Telemetry</h4>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+                Utilize the Client Console to monitor usage and track campaigns.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Counter & Info */}
-      <section style={{ background: 'rgba(255,255,255,0.01)', borderBottom: '1px solid var(--border-color)', padding: '60px 20px' }}>
-        <div className="stats-grid">
-          <div>
-            <div style={{ fontSize: '48px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--color-turquoise)' }}>99.9%</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>SMS Gateway Uptime</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '48px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--color-pink)' }}>150+</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>Supported Countries</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '48px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--color-violet)' }}>3.2M+</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>Orders Processed</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '48px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--color-green)' }}>&lt; 5s</div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '8px' }}>Average Delivery Speed</div>
+      {/* Engineered for High-Performance */}
+      <section style={{ padding: '96px 20px', background: 'var(--bg-main)', borderBottom: '1px solid var(--border-color)' }} id="features">
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '64px', alignItems: 'center' }}>
+            <div>
+              <h2 style={{ fontSize: '36px', lineHeight: '1.2', marginBottom: '24px', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>
+                Engineered For <br />
+                <span style={{ color: 'var(--color-turquoise)', fontStyle: 'italic' }}>High-Performance</span>
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.7', marginBottom: '40px' }}>
+                A custom infrastructure built to replace legacy digital vending with high reliability. We've optimized every layer of the transaction flow.
+              </p>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ color: 'var(--color-turquoise)', flexShrink: 0, paddingTop: '2px' }}>
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <h5 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '6px', color: 'var(--text-primary)' }}>Physical SIM Routing</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>Real hardware pools ensure 100% verification success.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ color: 'var(--color-turquoise)', flexShrink: 0, paddingTop: '2px' }}>
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <h5 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '6px', color: 'var(--text-primary)' }}>Zero-Roaming eSIM</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>Local profiles avoiding expensive charges with 5G speed.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ color: 'var(--color-turquoise)', flexShrink: 0, paddingTop: '2px' }}>
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <h5 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '6px', color: 'var(--text-primary)' }}>Reseller-Grade SMM</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>Direct API backbones providing high-quality engagement.</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <div style={{ color: 'var(--color-turquoise)', flexShrink: 0, paddingTop: '2px' }}>
+                    <Check size={18} />
+                  </div>
+                  <div>
+                    <h5 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '6px', color: 'var(--text-primary)' }}>Instant Dual-Billing</h5>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.5' }}>Switch seamlessly between Naira and USD with ease.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="editorial-card" style={{ padding: '8px', borderRadius: '4px' }}>
+                <div style={{ overflow: 'hidden', borderRadius: '2px' }}>
+                  <img 
+                    style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', filter: 'grayscale(100%)', transition: 'all 0.5s ease' }} 
+                    onMouseOver={e => e.currentTarget.style.filter = 'grayscale(0%)'}
+                    onMouseOut={e => e.currentTarget.style.filter = 'grayscale(100%)'}
+                    alt="Technical high-tech circuit board" 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmqRh-EmWlmBzOVlBTtydseqB-CtvVlFFmflEoTpSlmx1-FL5sw-eTb79f5n3cTNdmvo2QxHMLyIU3QSWBMsIF-2mYBFEfHyF0k1JA6rHMx8iTqDp1WT4kc93NiO7l7SgL5ubD2tsdDkWK3nL6OgHyzCZ9OwuzKbAn4-hLElEfQWW5ZeWV54bWu6U8QYrwrtpL60ZtLo1wylo9SAJZkWEiyHfWgnMooFr2EkN75w8Ha4QT7TYZcIg"
+                  />
+                </div>
+                <div style={{ marginTop: '16px', padding: '16px', borderTop: '1px solid var(--border-color)' }}>
+                  <p style={{ fontSize: '18px', fontWeight: '700', margin: '0 0 4px 0', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>99.9% Infrastructure Uptime</p>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>Global CDN and distributed API architecture for reliability.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Frequently Asked Questions */}
-      <section style={{ padding: '80px 20px', background: 'rgba(0,0,0,0.01)' }}>
+      <section style={{ padding: '96px 20px', background: 'var(--bg-btn-secondary)' }} id="faq">
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <h2 style={{ textAlign: 'center', fontSize: '32px', marginBottom: '12px', fontFamily: 'var(--font-heading)' }}>
-            Frequently Asked Questions
-          </h2>
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto 50px', lineHeight: '1.6' }}>
-            Have questions about billing, compatibility, or delivery? We have answers.
-          </p>
+          <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+            <h2 style={{ fontSize: '36px', marginBottom: '16px', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>
+              Frequently Asked Questions
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '16px', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
+              Expert answers to common queries about our digital asset ecosystem.
+            </p>
+          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="glass-panel">
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px', marginBottom: '8px', margin: 0 }}>
-                <HelpCircle size={18} style={{ color: 'var(--color-pink)', flexShrink: 0 }} />
-                Are the shared premium accounts safe to use?
-              </h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '8px 0 0 0', lineHeight: '1.6' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <details className="editorial-faq-card" style={{ cursor: 'pointer' }}>
+              <summary style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', listStyle: 'none', fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <HelpCircle size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
+                  <span>Are the shared premium accounts safe to use?</span>
+                </div>
+                <span className="material-symbols-outlined" style={{ transition: 'transform 0.3s ease' }}>expand_more</span>
+              </summary>
+              <div style={{ padding: '0 24px 24px 24px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                 Yes, absolutely. All accounts are family slots managed by our automated system. You receive a unique screen credential and password. To prevent disruptions, credentials must not be shared outside your allocated screen slot.
-              </p>
-            </div>
+              </div>
+            </details>
 
-            <div className="glass-panel">
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px', marginBottom: '8px', margin: 0 }}>
-                <HelpCircle size={18} style={{ color: 'var(--color-pink)', flexShrink: 0 }} />
-                What happens if a temporary number doesn't receive an OTP?
-              </h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '8px 0 0 0', lineHeight: '1.6' }}>
-                Our system operates under a strict success-only guarantee. If a temporary number does not receive an SMS code within its 15-minute window, the system automatically cancels the request and issues a full refund directly to your wallet balance.
-              </p>
-            </div>
+            <details className="editorial-faq-card" style={{ cursor: 'pointer' }}>
+              <summary style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', listStyle: 'none', fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <HelpCircle size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
+                  <span>What happens if a temporary number doesn't receive an OTP?</span>
+                </div>
+                <span className="material-symbols-outlined" style={{ transition: 'transform 0.3s ease' }}>expand_more</span>
+              </summary>
+              <div style={{ padding: '0 24px 24px 24px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                Our system operates under a strict success-only guarantee. If a temporary number does not receive an SMS code within its window, the system automatically cancels the request and issues a full refund directly to your wallet balance.
+              </div>
+            </details>
 
-            <div className="glass-panel">
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px', marginBottom: '8px', margin: 0 }}>
-                <HelpCircle size={18} style={{ color: 'var(--color-pink)', flexShrink: 0 }} />
-                How do I install my travel eSIM?
-              </h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '8px 0 0 0', lineHeight: '1.6' }}>
-                Once purchased, your profile installation QR code and manual details (SM-DP+ Address & Activation Code) display in your dashboard under E-Sims. Scan the code in your phone settings under 'Add Cellular Plan' while connected to Wi-Fi.
-              </p>
-            </div>
+            <details className="editorial-faq-card" style={{ cursor: 'pointer' }}>
+              <summary style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', listStyle: 'none', fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <HelpCircle size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
+                  <span>How do I install my travel eSIM?</span>
+                </div>
+                <span className="material-symbols-outlined" style={{ transition: 'transform 0.3s ease' }}>expand_more</span>
+              </summary>
+              <div style={{ padding: '0 24px 24px 24px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                Once purchased, your installation QR code and manual details display in your dashboard under E-Sims. Scan the code in your phone settings while connected to Wi-Fi.
+              </div>
+            </details>
 
-            <div className="glass-panel">
-              <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '15px', marginBottom: '8px', margin: 0 }}>
-                <HelpCircle size={18} style={{ color: 'var(--color-pink)', flexShrink: 0 }} />
-                Are the SMM boost reseller services instant?
-              </h4>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '8px 0 0 0', lineHeight: '1.6' }}>
-                Yes, most SMM reseller orders trigger instantly. High-volume requests queue and process progressively. You can monitor progress under the SMM panel order tracker.
-              </p>
+            <details className="editorial-faq-card" style={{ cursor: 'pointer' }}>
+              <summary style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px', listStyle: 'none', fontWeight: '700', fontSize: '16px', color: 'var(--text-primary)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <HelpCircle size={20} style={{ color: 'var(--color-turquoise)', flexShrink: 0 }} />
+                  <span>Are the SMM boost reseller services instant?</span>
+                </div>
+                <span className="material-symbols-outlined" style={{ transition: 'transform 0.3s ease' }}>expand_more</span>
+              </summary>
+              <div style={{ padding: '0 24px 24px 24px', fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                Yes, most SMM reseller orders trigger instantly. High-volume requests queue and process progressively. Monitor progress via the order tracker in your dashboard.
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      {/* Ready to Scale Section */}
+      <section style={{ padding: '96px 20px', background: 'var(--bg-main)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ background: 'var(--gradient-primary)', borderRadius: '4px', padding: '80px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden', boxShadow: 'var(--shadow-glow)' }}>
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <h2 style={{ fontSize: '42px', color: '#ffffff', marginBottom: '24px', fontFamily: 'var(--font-heading)', lineHeight: '1.2' }}>Ready to Scale Your <br />Digital Presence?</h2>
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '18px', maxWidth: '600px', margin: '0 auto 48px', lineHeight: '1.6' }}>Join over 100,000+ users trusting discountzar.ng for reliable and affordable digital assets.</p>
+              <button className="btn" style={{ padding: '16px 40px', background: '#ffffff', color: 'var(--color-turquoise)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.15em', fontSize: '13px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: 'var(--font-label)' }} onClick={() => navigate('/login')}>
+                Get Started Now
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="landing-footer">
-        <div className="landing-footer-content">
-          <div className="landing-footer-logo">
-            <Compass size={28} style={{ color: 'var(--color-turquoise)' }} />
-            <span style={{ fontSize: '20px', fontWeight: '800', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)' }}>discountzar.ng</span>
+      <footer style={{ background: '#0a090e', padding: '80px 20px 40px', borderTop: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '48px', maxWidth: '1200px', margin: '0 auto' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+              <img src="/logo.png" alt="ZAR Logo" style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '10px', flexShrink: 0 }} />
+            </div>
+            <p style={{ fontSize: '13px', lineHeight: '1.6', margin: '0 0 24px 0', color: '#94a3b8', fontFamily: 'var(--font-sans)' }}>
+              Premium digital gateway providing instant access to global services, communication tools, and social growth assets.
+            </p>
           </div>
-          
-          <div className="landing-footer-links">
-            <span onClick={() => navigate('/about')}>About Us</span>
-            <span onClick={() => navigate('/contact')}>Contact Us</span>
-            <span onClick={() => navigate('/terms')}>Terms of Service</span>
-            <span onClick={() => navigate('/privacy')}>Privacy Policy</span>
+          <div>
+            <h4 style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px', fontFamily: 'var(--font-label)' }}>Product</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/subs')}>Shared Accounts</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/esim')}>Global eSIM</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/otp')}>SMS OTP</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/smm')}>SMM Panel</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px', fontFamily: 'var(--font-label)' }}>Support</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/support')}>Help Center</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/api')}>API Documentation</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/terms')}>Refund Policy</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/dashboard/support')}>Support Ticket</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style={{ fontSize: '12px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '24px', fontFamily: 'var(--font-label)' }}>Legal</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px' }}>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/terms')}>Terms of Service</span></li>
+              <li><span style={{ cursor: 'pointer', color: '#94a3b8', transition: 'color 0.2s ease' }} onMouseOver={e => e.currentTarget.style.color = '#ffffff'} onMouseOut={e => e.currentTarget.style.color = '#94a3b8'} onClick={() => navigate('/privacy')}>Privacy Policy</span></li>
+            </ul>
           </div>
         </div>
-        
-        <div className="landing-footer-copyright">
+        <div style={{ maxWidth: '1200px', margin: '80px auto 0', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: '11px', color: '#71717a' }}>
           © 2026 discountzar.ng. Built as a premium high-fidelity service prototype. All rights reserved.
         </div>
       </footer>

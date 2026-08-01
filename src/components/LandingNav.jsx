@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { Compass, Menu, X, Sun, Moon, LogOut } from 'lucide-react';
@@ -6,7 +6,20 @@ import { Compass, Menu, X, Sun, Moon, LogOut } from 'lucide-react';
 const LandingNav = () => {
   const { isLoggedIn, logoutUser, user, theme, toggleTheme, dbIsAdmin } = useContext(AppContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleNavClick = (tab) => {
     if (tab === 'landing') navigate('/');
@@ -22,12 +35,19 @@ const LandingNav = () => {
   };
 
   return (
-    <nav className="landing-nav">
+    <nav className={`landing-nav ${scrolled ? 'scrolled' : ''}`}>
       <div className="landing-nav-left">
-        <div className="landing-brand" onClick={() => handleNavClick('landing')}>
-          <Compass size={28} style={{ color: 'var(--color-turquoise)' }} className="pulse-glow-cyan" />
-          <span className="landing-brand-text">discountzar.ng</span>
+        <div className="landing-brand" onClick={() => handleNavClick('landing')} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+          <img src="/logo.png" alt="ZAR Logo" style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '8px', flexShrink: 0 }} />
         </div>
+      </div>
+
+      {/* Middle Navigation Menu Links */}
+      <div className="landing-nav-links" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+        <a href="#services" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>Services</a>
+        <a href="#process" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>Process</a>
+        <a href="#features" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>Features</a>
+        <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>FAQ</a>
       </div>
 
       <div className="landing-nav-right">

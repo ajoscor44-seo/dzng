@@ -26,6 +26,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
       case 'api': return isMobile ? 'Developer API' : 'Developer API Portal';
       case 'support': return 'Support Desk';
       case 'admin': return isMobile ? 'Admin' : 'System Admin Sandbox';
+      case 'social': return isMobile ? 'Logs' : 'Social Media Logs';
       default: return 'DiscountZARNG Console';
     }
   };
@@ -119,15 +120,15 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
               alignItems: 'center', 
               gap: '6px', 
               cursor: 'pointer',
-              border: '1px solid rgba(0, 242, 254, 0.25)',
-              background: 'rgba(0, 242, 254, 0.05)',
-              boxShadow: '0 0 10px rgba(0, 242, 254, 0.05)',
+              border: '1px solid rgba(72, 58, 172, 0.25)',
+              background: 'rgba(72, 58, 172, 0.05)',
+              boxShadow: '0 0 10px rgba(72, 58, 172, 0.05)',
               flexShrink: 0
             }}
             title="Click to fund wallet"
           >
             <CreditCard size={isMobile ? 12 : 14} style={{ color: 'var(--color-turquoise)' }} />
-            <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+            <span style={{ fontSize: isMobile ? '12px' : '14px', fontWeight: '800', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)' }}>
               {formatCost(walletBalance)}
             </span>
           </div>
@@ -146,6 +147,27 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             Log In
           </button>
         )}
+
+        {/* Profile Avatar */}
+        {isLoggedIn && !isMobile && (
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            overflow: 'hidden',
+            border: '1px solid var(--border-color)',
+            flexShrink: 0,
+            cursor: 'pointer'
+          }} onClick={() => navigate('/dashboard/profile')}>
+            <img 
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              alt="Scholarly Curator Avatar"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeQ_z22RI97QEHUpxbyVjt7mYT82zsc6ruNMqQoSHL1p8Gc_Kok8uWWH1kxDi64AKt76hIzgkWt8KsK0ckkhBaN9nkNtqFnJPw2tFVcC0C21kz1PdeKMgF4ICUdoaIhAIla6ogRR75T9YPyXeXesMSDr6VrGtB79AQtRPOakt0I18GtSMCgzziw_s98UiYfQ9XRHcqbQjbTPEL0v203Hh3SeSrrk5e4kx9ZhQXJoHwnrAclfOboGDE"
+            />
+          </div>
+        )}
+
+
 
       </div>
     </header>
