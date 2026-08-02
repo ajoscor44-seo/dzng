@@ -804,30 +804,31 @@ const Marketplace = () => {
         </div>
       </footer>
 
-      {/* Sticky Mobile CTA */}
+      {/* Floating Mobile Balance Widget */}
       {isMobile && (
         <div style={{
           position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          background: 'rgba(10, 8, 20, 0.95)',
+          bottom: '16px',
+          left: '16px',
+          right: '16px',
+          background: 'var(--bg-card)',
           backdropFilter: 'blur(10px)',
-          borderTop: '1px solid var(--border-color)',
+          border: '1px solid var(--border-color)',
           padding: '12px 20px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           zIndex: 1000,
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.5)'
+          borderRadius: '30px',
+          boxShadow: 'var(--shadow-glow)'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Wallet Balance</span>
-            <span style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-turquoise)', fontFamily: 'var(--mono)' }}>{formatCost(walletBalance || 0)}</span>
+            <span style={{ fontSize: '9px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Wallet Balance</span>
+            <span style={{ fontSize: '15px', fontWeight: '800', color: 'var(--color-green)', fontFamily: 'var(--mono)' }}>{formatCost(walletBalance || 0)}</span>
           </div>
           <button 
             className="btn btn-primary" 
-            style={{ padding: '8px 16px', fontSize: '13px', background: 'var(--color-turquoise)', border: 'none', color: '#fff', fontWeight: '700', borderRadius: '4px', cursor: 'pointer' }}
+            style={{ padding: '8px 16px', fontSize: '13px', background: 'var(--color-turquoise)', border: 'none', color: '#fff', fontWeight: '700', borderRadius: '20px', cursor: 'pointer' }}
             onClick={() => navigate('/dashboard/wallet')}
           >
             Fund Wallet
