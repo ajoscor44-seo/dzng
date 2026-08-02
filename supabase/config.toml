@@ -1,5 +1,20 @@
 project_id = "hpkpkkjmfpnbklpctyiy"
 
+[auth]
+enable_signup = true
+double_confirm_changes = true
+enable_confirm_email = true
+
+[auth.email.smtp]
+enabled = true
+host = "smtp.sendbyte.africa"
+port = 587
+user = "apikey"
+pass = "your API key"
+admin_email = "noreply@discountzar.com"
+sender_name = "DiscountZAR"
+
+
 [functions.pocketfi-webhook]
 verify_jwt = false
 
