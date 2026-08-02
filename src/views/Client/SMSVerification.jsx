@@ -1,4 +1,5 @@
 import React, { useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { supabase } from '../../supabase';
@@ -108,6 +109,7 @@ const SMSVerification = () => {
     profitMarkup
   } = useContext(AppContext);
   const isMobile = useIsMobile();
+  const location = useLocation();
   const [otpPage, setOtpPage] = useState(1);
   const OTP_PER_PAGE = 10;
 
@@ -129,6 +131,19 @@ const SMSVerification = () => {
   const [tvPrices, setTvPrices] = useState({});
   const [isPriceLoading, setIsPriceLoading] = useState(false);
   const [step, setStep] = useState(1); // mobile wizard: 1=country, 2=service
+
+  useEffect(() => {
+    if (location.state?.preselectedService && otpServices.length > 0) {
+      const srv = otpServices.find(s => s.id === location.state.preselectedService);
+      if (srv) {
+        setSelectedService(srv.id);
+        if (countries.length > 0 && !selectedCountry) {
+          setSelectedCountry(countries[0]);
+        }
+        setStep(2);
+      }
+    }
+  }, [location.state, otpServices, countries]);
 
   useEffect(() => {
     if (activeSession) {

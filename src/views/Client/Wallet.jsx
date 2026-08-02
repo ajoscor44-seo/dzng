@@ -93,6 +93,32 @@ const Wallet = () => {
   return (
     <div className="animate-slide-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
+      {/* New User Promo Offer Banner */}
+      <div className="glass-panel pulse-glow-purple" style={{ 
+        background: 'linear-gradient(90deg, #16122e 0%, #2f183b 100%)',
+        border: '1px solid rgba(147, 51, 234, 0.4)', 
+        padding: '16px 20px', 
+        borderRadius: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '24px' }}>🎁</span>
+          <div>
+            <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '800', color: '#ffffff' }}>First Deposit Welcome Offer</h4>
+            <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
+              Get <strong style={{ color: 'var(--color-green)' }}>₦500 Cash Bonus</strong> credited on your first deposit of ₦5,000 or more!
+            </p>
+          </div>
+        </div>
+        <span className="badge" style={{ background: 'var(--color-violet)', color: '#ffffff', fontSize: '10px', fontWeight: '800', padding: '4px 10px', borderRadius: '99px' }}>
+          🛡️ Replacement Guarantee Active
+        </span>
+      </div>
+
       {/* Wallet Card */}
       <div className="glass-panel pulse-glow-cyan" style={{ 
         background: 'linear-gradient(135deg, rgba(8,6,15,0.9) 0%, rgba(14,11,24,0.9) 100%)',
@@ -252,10 +278,7 @@ const Wallet = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '12px', background: 'rgba(0, 242, 254, 0.05)', border: '1px solid rgba(0, 242, 254, 0.15)', borderRadius: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    <AlertCircle size={16} style={{ color: 'var(--color-turquoise)', flexShrink: 0, marginTop: '2px' }} />
-                    <span>Send any bank transfer (minimum ₦2,250) to this account to top-up. Funds are instantly detected via PocketFi and credited to your wallet balance.</span>
-                  </div>
+
 
                 </div>
               )}

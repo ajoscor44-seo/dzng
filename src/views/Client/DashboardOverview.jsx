@@ -4,7 +4,7 @@ import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import {
   CreditCard, Smartphone, Key, RefreshCw, Share2, User, ShieldCheck,
-  Clock, TrendingUp, Zap, ClipboardList, ArrowRight, Copy, Check
+  Clock, TrendingUp, Zap, ClipboardList, ArrowRight, Copy, Check, ShoppingBag
 } from 'lucide-react';
 
 const DashboardOverview = () => {
@@ -46,7 +46,7 @@ const DashboardOverview = () => {
     { label: 'Accounts', icon: User, tab: 'social' },
     { label: 'Social Logs', icon: ShieldCheck, tab: 'social' },
     { label: 'OTP Code', icon: Key, tab: 'otp' },
-    { label: 'eSIM', icon: Smartphone, tab: 'esim' },
+    { label: 'Marketplace', icon: ShoppingBag, url: '/marketplace' },
     { label: 'SMM', icon: Share2, tab: 'smm' },
     { label: 'Orders', icon: ClipboardList, tab: 'orders' },
   ];
@@ -121,7 +121,7 @@ const DashboardOverview = () => {
               return (
                 <button
                   key={i}
-                  onClick={() => ql.ext ? window.open(ql.url, '_blank') : navigate(`/dashboard/${ql.tab}`)}
+                  onClick={() => ql.ext ? window.open(ql.url, '_blank') : navigate(ql.url || `/dashboard/${ql.tab}`)}
                   style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: '1px solid var(--border-color)',
@@ -325,7 +325,7 @@ const DashboardOverview = () => {
                 return (
                   <button
                     key={i}
-                    onClick={() => ql.ext ? window.open(ql.url, '_blank') : navigate(`/dashboard/${ql.tab}`)}
+                    onClick={() => ql.ext ? window.open(ql.url, '_blank') : navigate(ql.url || `/dashboard/${ql.tab}`)}
                     style={{ background: 'var(--bg-card)', padding: '24px 16px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', cursor: 'pointer', transition: 'all 0.25s ease' }}
                     onMouseOver={e => {
                       e.currentTarget.style.background = 'var(--bg-card-hover)';

@@ -9,15 +9,16 @@ import loginSocialImg from '../assets/login_social.jpg';
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
+  const fromPath = location.state?.from?.pathname || "/dashboard";
+  const fromState = location.state?.from?.state || null;
 
   const { isLoggedIn, isAuthLoading } = useContext(AppContext);
 
   useEffect(() => {
     if (!isAuthLoading && isLoggedIn) {
-      navigate(from, { replace: true });
+      navigate(fromPath, { state: fromState, replace: true });
     }
-  }, [isLoggedIn, isAuthLoading, navigate, from]);
+  }, [isLoggedIn, isAuthLoading, navigate, fromPath, fromState]);
 
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);

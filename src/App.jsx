@@ -23,6 +23,7 @@ import ContactUs from './views/ContactUs';
 import TermsOfService from './views/TermsOfService';
 import PrivacyPolicy from './views/PrivacyPolicy';
 import Auth from './views/Auth';
+import Marketplace from './views/Marketplace';
 import { Analytics } from '@vercel/analytics/react';
 
 function ProtectedRoute() {
@@ -71,6 +72,7 @@ function AppContent() {
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/login" element={<Auth fallbackTab="/dashboard" />} />
+      <Route path="/marketplace" element={<Marketplace />} />
 
       {/* Admin Test Route (/test) */}
       <Route path="/test" element={<DashboardLayout />} >
@@ -86,7 +88,7 @@ function AppContent() {
       <Route path="/dashboard" element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route index element={<DashboardOverview />} />
-          <Route path="subs" element={<Subscriptions />} />
+          <Route path="subs/*" element={<Subscriptions />} />
           <Route path="otp" element={<SMSVerification />} />
           <Route path="reuse" element={<ReuseNumbers />} />
           <Route path="esim/*" element={<ESim />} />

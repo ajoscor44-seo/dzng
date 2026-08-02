@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { useNavigate, useMatch } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { createPortal } from 'react-dom';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -27,12 +28,23 @@ const Subscriptions = () => {
   const [accPage, setAccPage] = useState(1);
   const ACC_PER_PAGE = 5;
 
-  const [selectedSub, setSelectedSub] = useState(null);
+  const navigate = useNavigate();
+  const buyMatch = useMatch('/dashboard/subs/buy/:id');
+  const selectedSubId = buyMatch?.params?.id;
+  const selectedSub = selectedSubId ? subscriptions.find(s => String(s.id) === String(selectedSubId)) : null;
+
   const [showCreds, setShowCreds] = useState({});
   const [copiedId, setCopiedId] = useState(null);
   const [purchaseError, setPurchaseError] = useState('');
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [generatedAccount, setGeneratedAccount] = useState(null);
+
+  const closeSubModal = () => {
+    setPurchaseError('');
+    setPurchaseSuccess(false);
+    setGeneratedAccount(null);
+    navigate('/dashboard/subs');
+  };
 
   const togglePasswordVisibility = (id) => {
     setShowCreds(prev => ({ ...prev, [id]: !prev[id] }));
@@ -59,9 +71,7 @@ const Subscriptions = () => {
       setPurchaseSuccess(true);
       setGeneratedAccount(result.sub);
       setTimeout(() => {
-        setSelectedSub(null);
-        setPurchaseSuccess(false);
-        setGeneratedAccount(null);
+        closeSubModal();
       }, 5000);
     } else {
       setPurchaseError(result.msg);
@@ -127,7 +137,7 @@ const Subscriptions = () => {
               <button 
                 className="btn btn-primary" 
                 style={{ width: '100%', marginTop: '16px' }}
-                onClick={() => setSelectedSub(sub)}
+                onClick={() => navigate(`/dashboard/subs/buy/${sub.id}`)}
               >
                 Purchase Access Slot
               </button>
@@ -259,7 +269,7 @@ const Subscriptions = () => {
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button className="btn btn-secondary" onClick={() => setSelectedSub(null)}>Cancel</button>
+                <button className="btn btn-secondary" onClick={closeSubModal}>Cancel</button>
                 <button className="btn btn-primary" onClick={handlePurchase}>Confirm & Deduct</button>
               </div>
             )}

@@ -72,39 +72,38 @@ const LandingPage = () => {
             <Zap size={14} />
             <span style={{ fontSize: '12px', letterSpacing: '0.15em', fontWeight: '700', textTransform: 'uppercase', fontFamily: 'var(--font-label)' }}>All-In-One Digital Services Hub</span>
           </div>
-          <h1 className="landing-title" style={{ fontSize: '56px', lineHeight: '1.2', fontWeight: '800', fontFamily: 'var(--font-heading)', marginBottom: '32px', color: 'var(--text-primary)' }}>
-            Discount Shared Services, <br />
-            <span style={{ color: 'var(--color-turquoise)', fontStyle: 'italic' }}>eSIMs, Virtual SMS & SMM</span>
+          <h1 className="landing-title" style={{ fontSize: '56px', lineHeight: '1.2', fontWeight: '800', fontFamily: 'var(--font-heading)', marginBottom: '24px', color: 'var(--text-primary)' }}>
+            Buy SMS Numbers, Accounts & Digital Products Instantly
           </h1>
-          <p className="landing-desc" style={{ fontSize: '18px', color: 'var(--text-secondary)', maxWidth: '680px', margin: '0 auto 40px', lineHeight: '1.7', fontFamily: 'var(--font-sans)' }}>
-            DiscountZARNG matches top-tier telecom access, verification tools, and shared subscription channels under a single premium dashboard. Fund in NGN/USD and deploy assets instantly.
+          <p className="landing-desc" style={{ fontSize: '18px', color: 'var(--text-secondary)', maxWidth: '680px', margin: '0 auto 40px', lineHeight: '1.7', fontFamily: 'var(--font-sans)', fontWeight: '600' }}>
+            Auto Delivery • Fast Support • Affordable Pricing
           </p>
           <div className="hero-buttons" style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '80px', flexWrap: 'wrap' }}>
-            <button className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--color-turquoise)', border: 'none', color: '#fff', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-              Enter Dashboard <ArrowRight size={18} style={{ marginLeft: '4px' }} />
+            <button className="btn btn-primary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--color-turquoise)', border: 'none', color: '#fff', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/marketplace')}>
+              Browse Products <ArrowRight size={18} style={{ marginLeft: '4px' }} />
             </button>
-            <button className="btn btn-secondary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', background: 'var(--bg-btn-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/dashboard/otp')}>
-              Get Free OTP Trial
+            <button className="btn btn-secondary" style={{ padding: '14px 28px', fontSize: '15px', borderRadius: '4px', background: 'var(--bg-btn-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontWeight: '700', cursor: 'pointer' }} onClick={() => navigate('/dashboard/wallet')}>
+              Fund Wallet
             </button>
           </div>
 
           {/* Integrated Stats Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '32px', maxWidth: '800px', margin: '0 auto', borderTop: '1px solid var(--border-color)', paddingTop: '40px' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>99.9%</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>SMS Uptime</span>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>52,000+</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Orders Completed</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>12,000+</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Happy Customers</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>150+</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Countries</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Countries Served</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>3.2M+</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Orders</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>&lt; 5s</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Delivery</span>
+              <span style={{ fontSize: '32px', fontWeight: '700', color: 'var(--color-turquoise)', fontFamily: 'var(--font-heading)' }}>⚡ Instant</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '6px', fontFamily: 'var(--font-label)' }}>Auto Delivery</span>
             </div>
           </div>
         </div>
@@ -149,7 +148,7 @@ const LandingPage = () => {
                     style={{ color: 'var(--color-turquoise)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: 'var(--font-label)' }}
                     onClick={() => {
                       if (feat.action === 'subs') {
-                        window.open('https://www.discountzar.com/marketplace', '_blank');
+                        navigate('/marketplace');
                       } else {
                         navigate(`/dashboard/${feat.action}`);
                       }

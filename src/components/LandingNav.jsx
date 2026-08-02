@@ -48,6 +48,7 @@ const LandingNav = () => {
         <a href="#process" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>Process</a>
         <a href="#features" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>Features</a>
         <a href="#faq" style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s ease', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em' }} onMouseOver={e => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}>FAQ</a>
+        <span onClick={() => navigate('/marketplace')} style={{ color: 'var(--color-pink)', cursor: 'pointer', fontSize: '14px', fontWeight: '700', fontFamily: 'var(--font-label)', textTransform: 'uppercase', letterSpacing: '0.05em', transition: 'opacity 0.2s' }} onMouseOver={e => e.currentTarget.style.opacity = 0.8} onMouseOut={e => e.currentTarget.style.opacity = 1}>⭐ Marketplace</span>
       </div>
 
       <div className="landing-nav-right">
@@ -98,7 +99,7 @@ const LandingNav = () => {
               )}
             </span>
             <span onClick={() => handleNavClick('smm')} style={{ color: 'var(--text-primary)', fontWeight: '600' }}>📈 SMM Panel Reseller</span>
-            <span onClick={() => window.open('https://www.discountzar.com/marketplace', '_blank')} style={{ color: 'var(--color-pink)', fontWeight: '700' }}>⭐ Premium Accounts Shop ↗</span>
+            <span onClick={() => { navigate('/marketplace'); setMenuOpen(false); }} style={{ color: 'var(--color-pink)', fontWeight: '700' }}>⭐ Premium Accounts Shop</span>
           </div>
 
           <div className="landing-mobile-menu-actions">
