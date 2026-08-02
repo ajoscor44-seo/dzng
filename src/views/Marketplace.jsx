@@ -421,7 +421,8 @@ const Marketplace = () => {
   ], []);
 
   return (
-    <div className="landing-container animate-slide-in" style={{ background: 'var(--bg-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <>
+      <div className="landing-container animate-slide-in" style={{ background: 'var(--bg-main)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Top Announcement Bar for Recent Deliveries */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.02)',
@@ -803,6 +804,7 @@ const Marketplace = () => {
           © 2026 discountzar.ng. Built as a premium high-fidelity service prototype. All rights reserved.
         </div>
       </footer>
+    </div>
 
       {/* Floating Mobile Balance Widget */}
       {isMobile && (
@@ -861,7 +863,7 @@ const Marketplace = () => {
           <span>{activityList[currentActivityIdx].user} {activityList[currentActivityIdx].action}</span>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
