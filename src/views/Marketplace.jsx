@@ -839,7 +839,7 @@ const Marketplace = () => {
       {showActivity && (
         <div style={{
           position: 'fixed',
-          bottom: isMobile ? '120px' : '80px',
+          top: isMobile ? '80px' : '100px',
           left: '24px',
           background: 'rgba(10, 8, 20, 0.95)',
           backdropFilter: 'blur(10px)',
