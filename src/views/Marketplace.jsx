@@ -809,18 +809,18 @@ const Marketplace = () => {
         <div style={{
           position: 'fixed',
           bottom: '16px',
-          left: '16px',
           right: '16px',
           background: 'var(--bg-card)',
           backdropFilter: 'blur(10px)',
           border: '1px solid var(--border-color)',
-          padding: '12px 20px',
+          padding: '10px 16px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           zIndex: 1000,
           borderRadius: '30px',
-          boxShadow: 'var(--shadow-glow)'
+          boxShadow: 'var(--shadow-glow)',
+          gap: '16px'
         }}>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '9px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: '600' }}>Wallet Balance</span>
