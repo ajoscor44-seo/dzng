@@ -851,7 +851,7 @@ const Marketplace = () => {
           borderRadius: '30px',
           fontSize: '12px',
           fontWeight: '600',
-          color: 'var(--color-turquoise)',
+          color: '#faf9fa',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
