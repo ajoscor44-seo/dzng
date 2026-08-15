@@ -7,8 +7,19 @@ import {
   ShieldCheck, MessageSquare, Plus, Save, DollarSign, Wallet, 
   CheckCircle, AlertCircle, Users, List, BarChart3, Settings, 
   TrendingUp, RefreshCw, Send, ArrowUpRight, Search, FileText, Download,
-  Eye, UserCheck, Ban, LayoutDashboard
+  Eye, UserCheck, Ban, LayoutDashboard, Activity, ArrowRight, Clock,
+  CreditCard, Server, Zap, Check, Smartphone, Share2, Key, ShoppingBag,
+  ExternalLink
 } from 'lucide-react';
+
+// Module-level in-memory cache to ensure zero reload/flash on tab navigation
+let adminDataCache = {
+  profiles: null,
+  transactions: null,
+  otpOrders: null,
+  tickets: null,
+  lastFetched: 0
+};
 
 const AdminDashboard = () => {
   const { 
@@ -74,43 +85,45 @@ const AdminDashboard = () => {
   const [txPage, setTxPage] = useState(1);
   const TX_PER_PAGE = 20;
 
-  // Database-synced states
-  const [dbProfiles, setDbProfiles] = useState([]);
-  const [dbTransactions, setDbTransactions] = useState([]);
-  const [dbOtpOrders, setDbOtpOrders] = useState([]);
-  const [dbTickets, setDbTickets] = useState([]);
+  // Database-synced states (initialized from cache if available)
+  const [dbProfiles, setDbProfiles] = useState(() => adminDataCache.profiles || []);
+  const [dbTransactions, setDbTransactions] = useState(() => adminDataCache.transactions || []);
+  const [dbOtpOrders, setDbOtpOrders] = useState(() => adminDataCache.otpOrders || []);
+  const [dbTickets, setDbTickets] = useState(() => adminDataCache.tickets || []);
   const [isLoadingDb, setIsLoadingDb] = useState(false);
   const [updatingTicketId, setUpdatingTicketId] = useState(null);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = async (force = false) => {
+    // If we have cached data and it's less than 60s old, avoid re-fetching unless forced
+    if (!force && adminDataCache.profiles && (Date.now() - adminDataCache.lastFetched < 60000)) {
+      return;
+    }
     setIsLoadingDb(true);
     try {
-      const profilesRes = await adminFetchAllProfiles();
-      if (profilesRes.success) {
+      const [profilesRes, txRes, otpOrdersRes, ticketsRes] = await Promise.all([
+        adminFetchAllProfiles(),
+        adminFetchAllTransactions(),
+        adminFetchAllOtpOrders(),
+        supabase.from('support_tickets').select('*').order('created_at', { ascending: false })
+      ]);
+
+      if (profilesRes && profilesRes.success) {
         setDbProfiles(profilesRes.data);
-      } else {
-        console.error("AdminDashboard - Failed to fetch profiles:", profilesRes.msg);
+        adminDataCache.profiles = profilesRes.data;
       }
-      const txRes = await adminFetchAllTransactions();
-      if (txRes.success) {
+      if (txRes && txRes.success) {
         setDbTransactions(txRes.data);
-      } else {
-        console.error("AdminDashboard - Failed to fetch transactions:", txRes.msg);
+        adminDataCache.transactions = txRes.data;
       }
-      const otpOrdersRes = await adminFetchAllOtpOrders();
-      if (otpOrdersRes.success) {
+      if (otpOrdersRes && otpOrdersRes.success) {
         setDbOtpOrders(otpOrdersRes.data);
-      } else {
-        console.error("AdminDashboard - Failed to fetch OTP orders:", otpOrdersRes.msg);
+        adminDataCache.otpOrders = otpOrdersRes.data;
       }
-      // Fetch support tickets live from DB
-      const { data: ticketsData, error: ticketsError } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (!ticketsError && ticketsData) {
-        setDbTickets(ticketsData);
+      if (ticketsRes && !ticketsRes.error && ticketsRes.data) {
+        setDbTickets(ticketsRes.data);
+        adminDataCache.tickets = ticketsRes.data;
       }
+      adminDataCache.lastFetched = Date.now();
     } catch (e) {
       console.error("Failed to load admin db data:", e);
     } finally {
@@ -128,7 +141,7 @@ const AdminDashboard = () => {
       if (error) {
         alert(`Failed to update ticket status: ${error.message}`);
       } else {
-        await fetchAdminData();
+        await fetchAdminData(true);
       }
     } catch (err) {
       console.error(err);
@@ -147,7 +160,7 @@ const AdminDashboard = () => {
       if (error) {
         alert(`Failed to delete ticket: ${error.message}`);
       } else {
-        await fetchAdminData();
+        await fetchAdminData(true);
       }
     } catch (err) {
       console.error(err);
@@ -156,7 +169,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchAdminData();
-  }, [adminTab]);
+  }, []);
 
   // Combine real database-linked profiles
   const allUsers = useMemo(() => {
@@ -253,7 +266,45 @@ const AdminDashboard = () => {
   const totalUserPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
 
   // User Management State
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const selectedUser = useMemo(() => {
+    if (!allUsers || allUsers.length === 0) return null;
+    return allUsers.find(u => u.id === selectedUserId) || allUsers[0] || null;
+  }, [allUsers, selectedUserId]);
+  
+  const [userModalTab, setUserModalTab] = useState('overview'); // 'overview', 'transactions', 'otp', 'tickets', 'adjust'
+
+  const userTransactions = useMemo(() => {
+    if (!selectedUser) return [];
+    return (dbTransactions || []).filter(t => t.user_id === selectedUser.id);
+  }, [selectedUser, dbTransactions]);
+
+  const userOtpOrders = useMemo(() => {
+    if (!selectedUser) return [];
+    return (dbOtpOrders || []).filter(o => o.user_id === selectedUser.id);
+  }, [selectedUser, dbOtpOrders]);
+
+  const userTickets = useMemo(() => {
+    if (!selectedUser) return [];
+    return (dbTickets || []).filter(t => 
+      t.user_id === selectedUser.id || 
+      (t.email && selectedUser.email && t.email.toLowerCase() === selectedUser.email.toLowerCase()) || 
+      (t.phone && selectedUser.phone && t.phone === selectedUser.phone && t.phone !== 'N/A')
+    );
+  }, [selectedUser, dbTickets]);
+
+  const userLifetimeDeposited = useMemo(() => {
+    return userTransactions
+      .filter(t => t.type === 'Deposit')
+      .reduce((sum, t) => sum + Number(t.amountNgn || t.amount || 0), 0);
+  }, [userTransactions]);
+
+  const userLifetimeSpent = useMemo(() => {
+    return userTransactions
+      .filter(t => t.type === 'Purchase')
+      .reduce((sum, t) => sum + Number(t.amountNgn || t.amount || 0), 0);
+  }, [userTransactions]);
+
   const [adjustAmount, setAdjustAmount] = useState('');
   const [adjustType, setAdjustType] = useState('set'); // set, add, deduct
   const [adjustResult, setAdjustResult] = useState('');
@@ -357,28 +408,6 @@ const AdminDashboard = () => {
     }
   }, [allTargets, selectedNumber]);
 
-  // Keep selected user state synced when balances or user list change
-  useEffect(() => {
-    if (allUsers.length > 0) {
-      if (!selectedUser) {
-        setSelectedUser(allUsers[0]);
-      } else {
-        const updated = allUsers.find(u => u.id === selectedUser.id);
-        if (updated) {
-          // Only update if critical properties changed to prevent recursive render loops
-          if (updated.wallet_balance !== selectedUser.wallet_balance || 
-              updated.full_name !== selectedUser.full_name ||
-              updated.phone !== selectedUser.phone ||
-              updated.email !== selectedUser.email) {
-            setSelectedUser(updated);
-          }
-        } else {
-          setSelectedUser(allUsers[0]);
-        }
-      }
-    }
-  }, [allUsers, walletBalance, dbProfiles, selectedUser]);
-
   const handleSimulateSms = (e) => {
     e.preventDefault();
     setSimResult({ success: null, msg: '' });
@@ -440,7 +469,7 @@ const AdminDashboard = () => {
         setManualWallet(targetNewBalance);
       }
       setAdjustResult(`Database wallet updated: ${formatCost(targetNewBalance)}`);
-      await fetchAdminData();
+      await fetchAdminData(true);
     } else {
       setAdjustResult(`Mock client wallet adjustment is not supported.`);
     }
@@ -464,15 +493,16 @@ const AdminDashboard = () => {
         setAdjustResult(`Simulation failed: ${error.message}`);
       } else {
         setSimDepositSuccess(true);
-        await fetchAdminData();
+        await fetchAdminData(true);
       }
     } else {
       setAdjustResult(`Mock client webhook deposit is not supported.`);
     }
   };
 
-  const handleOpenEditModal = (u) => {
-    setSelectedUser(u);
+  const handleOpenEditModal = (u, defaultTab = 'overview') => {
+    setSelectedUserId(u.id);
+    setUserModalTab(defaultTab);
     const dbProf = (dbProfiles || []).find(p => p.id === u.id) || {};
     setEditFullName(u.full_name.replace(' (You / Admin)', ''));
     setEditUsername(dbProf.username || '');
@@ -498,7 +528,7 @@ const AdminDashboard = () => {
       });
       if (res.success) {
         setEditProfileResult('Profile updated successfully!');
-        await fetchAdminData();
+        await fetchAdminData(true);
       } else {
         setEditProfileResult(`Update failed: ${res.msg}`);
       }
@@ -592,7 +622,7 @@ const AdminDashboard = () => {
         <h1 className="wp-heading" style={{ margin: 0 }}>{title}</h1>
         <button 
           className="wp-button-secondary" 
-          onClick={fetchAdminData} 
+          onClick={() => fetchAdminData(true)} 
           disabled={isLoadingDb}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', height: '30px', padding: '0 12px', fontSize: '13px', borderRadius: '3px' }}
         >
@@ -1175,50 +1205,566 @@ const AdminDashboard = () => {
         {/* OVERVIEW TAB */}
         {adminTab === 'overview' && (
           <div>
-            {renderTabHeader('Dashboard')}
+            {renderTabHeader('Admin Executive Overview')}
             
-            <div className="wp-card-grid">
-              <div className="wp-metabox">
+            {/* 1. Main KPI Metrics Grid */}
+            <div className="wp-card-grid" style={{ gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(210px, 1fr))', gap: '15px' }}>
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: '4px solid #00a32a' }}>
                 <div className="wp-metabox-header">
                   <h2>System Cash Pool</h2>
+                  <Wallet size={16} style={{ color: '#00a32a' }} />
                 </div>
                 <div className="wp-metabox-content">
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#00a32a' }}>{formatCost(totalClientCash)}</div>
-                  <div style={{ fontSize: '12px', color: '#646970', marginTop: '4px' }}>Total client balances</div>
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#00a32a' }}>{formatCost(totalClientCash)}</div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Client Liabilities</span>
+                    <span style={{ fontWeight: '600' }}>Avg {formatCost(totalClientCash / Math.max(1, liveUserCount))}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="wp-metabox">
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: '4px solid #00b4d8' }}>
                 <div className="wp-metabox-header">
-                  <h2>Est. Platform Profit</h2>
+                  <h2>Total Real Deposits</h2>
+                  <CreditCard size={16} style={{ color: '#00b4d8' }} />
                 </div>
                 <div className="wp-metabox-content">
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2271b1' }}>{formatCost(estimatedProfit)}</div>
-                  <div style={{ fontSize: '12px', color: '#646970', marginTop: '4px' }}>Estimated OTP markups</div>
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#00b4d8' }}>{formatCost(totalDepositedReal)}</div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Inflow Volume</span>
+                    <span style={{ fontWeight: '600' }}>{liveDepositCount} top-ups</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="wp-metabox">
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: '4px solid #2271b1' }}>
+                <div className="wp-metabox-header">
+                  <h2>Est. Net Profit</h2>
+                  <TrendingUp size={16} style={{ color: '#2271b1' }} />
+                </div>
+                <div className="wp-metabox-content">
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#2271b1' }}>{formatCost(estimatedProfit)}</div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Service Markups</span>
+                    <span style={{ fontWeight: '600', color: '#00a32a' }}>+{((estimatedProfit / Math.max(1, totalDepositedReal)) * 100).toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: '4px solid #1d2327' }}>
                 <div className="wp-metabox-header">
                   <h2>Live DB Clients</h2>
+                  <Users size={16} style={{ color: '#1d2327' }} />
                 </div>
                 <div className="wp-metabox-content">
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1d2327' }}>{liveUserCount} Users</div>
-                  <div style={{ fontSize: '12px', color: '#646970', marginTop: '4px' }}>Registered in database</div>
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#1d2327' }}>{liveUserCount} <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#646970' }}>Users</span></div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>Active Profiles</span>
+                    <span style={{ fontWeight: '600', color: '#2271b1' }}>{verifiedUserIds.length} Verified</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="wp-metabox">
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: '4px solid #7952cc' }}>
                 <div className="wp-metabox-header">
-                  <h2>System Orders</h2>
+                  <h2>Audit Ledger Events</h2>
+                  <List size={16} style={{ color: '#7952cc' }} />
                 </div>
                 <div className="wp-metabox-content">
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1d2327' }}>{totalLedgerTransactions} total</div>
-                  <div style={{ fontSize: '12px', color: '#646970', marginTop: '4px' }}>Audit transaction count</div>
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: '#7952cc' }}>{totalLedgerTransactions} <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#646970' }}>Logs</span></div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{livePurchaseCount} Purchases</span>
+                    <span style={{ fontWeight: '600' }}>{dbOtpOrders.length} OTP orders</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="wp-metabox" style={{ marginBottom: 0, borderLeft: `4px solid ${dbTickets.filter(t => t.status === 'OPEN').length > 0 ? '#d63638' : '#00a32a'}` }}>
+                <div className="wp-metabox-header">
+                  <h2>Support Desk</h2>
+                  <MessageSquare size={16} style={{ color: dbTickets.filter(t => t.status === 'OPEN').length > 0 ? '#d63638' : '#00a32a' }} />
+                </div>
+                <div className="wp-metabox-content">
+                  <div style={{ fontSize: '24px', fontWeight: '800', color: dbTickets.filter(t => t.status === 'OPEN').length > 0 ? '#d63638' : '#00a32a' }}>
+                    {dbTickets.filter(t => t.status === 'OPEN').length} <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#646970' }}>Open</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#646970', marginTop: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                    <span>{dbTickets.length} Total Tickets</span>
+                    <span style={{ fontWeight: '600', color: dbTickets.filter(t => t.status === 'OPEN').length > 0 ? '#d63638' : '#00a32a' }}>
+                      {dbTickets.filter(t => t.status === 'OPEN').length > 0 ? 'Needs Action' : 'All Clear'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* 2. Admin Quick Launchpad */}
+            <div className="wp-metabox" style={{ marginTop: '20px', background: '#fff' }}>
+              <div className="wp-metabox-header">
+                <h2>Quick Admin Launchpad</h2>
+                <span style={{ fontSize: '11px', color: '#646970' }}>1-Click Operations</span>
+              </div>
+              <div className="wp-metabox-content" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px', padding: '15px' }}>
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('users')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#2271b1'; e.currentTarget.style.background = '#f0f6fc'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <Users size={20} style={{ color: '#2271b1' }} />
+                  <span>Manage Users</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('sms')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#00a32a'; e.currentTarget.style.background = '#f0fdf4'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <Send size={20} style={{ color: '#00a32a' }} />
+                  <span>SMS Simulator</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('pricing')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#7952cc'; e.currentTarget.style.background = '#faf5ff'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <DollarSign size={20} style={{ color: '#7952cc' }} />
+                  <span>Rates & Markups</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('transactions')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#0284c7'; e.currentTarget.style.background = '#f0f9ff'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <List size={20} style={{ color: '#0284c7' }} />
+                  <span>Audit Ledger</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('otplogs')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#f59e0b'; e.currentTarget.style.background = '#fffbeb'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <Key size={20} style={{ color: '#f59e0b' }} />
+                  <span>OTP Orders</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('tickets')}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px 10px',
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    color: '#1e293b',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    transition: 'all 0.15s ease'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = '#d63638'; e.currentTarget.style.background = '#fef2f2'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = '#f8fafc'; }}
+                >
+                  <MessageSquare size={20} style={{ color: '#d63638' }} />
+                  <span>Support Desk</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 3. Real-time Live Operations Feed (Two Columns) */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+              
+              {/* Left Column: Recent Database Transactions */}
+              <div className="wp-metabox" style={{ marginBottom: 0 }}>
+                <div className="wp-metabox-header">
+                  <h2>Recent Audit Transactions</h2>
+                  <button 
+                    type="button" 
+                    className="wp-button-secondary" 
+                    style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                    onClick={() => setAdminTab('transactions')}
+                  >
+                    View All ({allTransactions.length}) <ArrowRight size={12} style={{ marginLeft: '4px' }} />
+                  </button>
+                </div>
+                <div className="wp-metabox-content" style={{ padding: '10px 15px' }}>
+                  {allTransactions.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                      No recent transaction events recorded.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {allTransactions.slice(0, 5).map((tx, idx) => {
+                        const isDeposit = tx.type === 'Deposit';
+                        return (
+                          <div 
+                            key={tx.id || idx} 
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              padding: '8px 10px',
+                              background: '#f9fafb',
+                              border: '1px solid #f1f5f9',
+                              borderRadius: '6px'
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{
+                                width: '28px',
+                                height: '28px',
+                                borderRadius: '6px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: isDeposit ? 'rgba(0, 163, 42, 0.1)' : 'rgba(34, 113, 177, 0.1)',
+                                color: isDeposit ? '#00a32a' : '#2271b1'
+                              }}>
+                                {isDeposit ? <ArrowUpRight size={16} /> : <ShoppingBag size={14} />}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                                  {tx.user_name || tx.method || 'System Event'}
+                                </div>
+                                <div style={{ fontSize: '11px', color: '#64748b' }}>
+                                  {tx.date || new Date(tx.created_at).toLocaleString()} • {tx.method || tx.type}
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: isDeposit ? '#00a32a' : '#1e293b' }}>
+                                {isDeposit ? '+' : '-'}{formatCost(tx.amountNgn || tx.amount || 0)}
+                              </div>
+                              <span style={{
+                                fontSize: '10px',
+                                padding: '1px 6px',
+                                borderRadius: '4px',
+                                fontWeight: '600',
+                                background: tx.status === 'SUCCESS' ? 'rgba(0, 163, 42, 0.1)' : '#fef2f2',
+                                color: tx.status === 'SUCCESS' ? '#00a32a' : '#dc2626'
+                              }}>
+                                {tx.status || 'SUCCESS'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Support Tickets & Gateway Status */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                
+                {/* Support Inquiries Preview */}
+                <div className="wp-metabox" style={{ marginBottom: 0 }}>
+                  <div className="wp-metabox-header">
+                    <h2>Active Support Inquiries</h2>
+                    <button 
+                      type="button" 
+                      className="wp-button-secondary" 
+                      style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                      onClick={() => setAdminTab('tickets')}
+                    >
+                      All Tickets ({dbTickets.length}) <ArrowRight size={12} style={{ marginLeft: '4px' }} />
+                    </button>
+                  </div>
+                  <div className="wp-metabox-content" style={{ padding: '10px 15px' }}>
+                    {dbTickets.length === 0 ? (
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                        No support tickets filed yet. Support desk is clear!
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {dbTickets.slice(0, 4).map((ticket) => {
+                          const isOpen = ticket.status === 'OPEN';
+                          const isResolved = ticket.status === 'RESOLVED';
+                          return (
+                            <div 
+                              key={ticket.id} 
+                              style={{ 
+                                padding: '10px', 
+                                background: '#f9fafb', 
+                                border: '1px solid #f1f5f9', 
+                                borderRadius: '6px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <div style={{ flex: 1, minWidth: 0, paddingRight: '10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                  <span style={{
+                                    fontSize: '10px',
+                                    fontWeight: '700',
+                                    padding: '1px 6px',
+                                    borderRadius: '4px',
+                                    background: isOpen ? '#fee2e2' : isResolved ? '#dcfce7' : '#fef3c7',
+                                    color: isOpen ? '#b91c1c' : isResolved ? '#15803d' : '#b45309'
+                                  }}>
+                                    {ticket.status || 'OPEN'}
+                                  </span>
+                                  <span style={{ fontSize: '11px', color: '#64748b' }}>{ticket.category || 'General'}</span>
+                                </div>
+                                <div style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {ticket.subject || ticket.message || 'Support Request'}
+                                </div>
+                                <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                                  From: {ticket.full_name || ticket.phone || 'Customer'} • {new Date(ticket.created_at).toLocaleDateString()}
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="wp-button-secondary"
+                                style={{ height: '26px', fontSize: '11px', padding: '0 8px', flexShrink: 0 }}
+                                onClick={() => setAdminTab('tickets')}
+                              >
+                                Review
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Gateway & Infrastructure Health Matrix */}
+                <div className="wp-metabox" style={{ marginBottom: 0 }}>
+                  <div className="wp-metabox-header">
+                    <h2>Infrastructure & Gateway Matrix</h2>
+                    <span style={{ fontSize: '11px', color: '#00a32a', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00a32a', display: 'inline-block' }}></span>
+                      All Systems Operational
+                    </span>
+                  </div>
+                  <div className="wp-metabox-content" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '12px 15px' }}>
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>PostgreSQL Database</div>
+                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#00a32a', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Check size={14} /> Supabase Online
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>Payment Webhooks</div>
+                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#00a32a', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Check size={14} /> PocketFi Active
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>SMS OTP Gateway</div>
+                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#00a32a', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Check size={14} /> Multi-Provider Online
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 12px', borderRadius: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>SMM Reseller Gateway</div>
+                      <div style={{ fontSize: '12px', fontWeight: '700', color: '#00a32a', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <Check size={14} /> Realtime Connected
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* 4. Service Breakdown & Top VIP Clients */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+              
+              {/* Category Purchase Volume breakdown */}
+              <div className="wp-metabox" style={{ marginBottom: 0 }}>
+                <div className="wp-metabox-header">
+                  <h2>Service Revenue Distribution</h2>
+                  <span style={{ fontSize: '11px', color: '#646970' }}>By Category Share</span>
+                </div>
+                <div className="wp-metabox-content" style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '15px' }}>
+                  {(() => {
+                    const totalVolume = Math.max(1, categoryStats.otp.volume + categoryStats.esim.volume + categoryStats.smm.volume + categoryStats.subs.volume + categoryStats.other.volume);
+                    const renderCategoryRow = (title, stats, color) => {
+                      const percent = ((stats.volume / totalVolume) * 100).toFixed(1);
+                      return (
+                        <div key={title}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '12px' }}>
+                            <span style={{ fontWeight: '600', color: '#1e293b' }}>{title} <span style={{ color: '#646970', fontWeight: '400', fontSize: '11px' }}>({stats.count} orders)</span></span>
+                            <span style={{ fontWeight: 'bold' }}>{formatCost(stats.volume)} <span style={{ color: '#8c8f94', fontWeight: '400', fontSize: '11px' }}>({percent}%)</span></span>
+                          </div>
+                          <div style={{ height: '8px', background: '#f0f0f1', borderRadius: '4px', overflow: 'hidden' }}>
+                            <div style={{ width: `${percent}%`, height: '100%', background: color, borderRadius: '4px', transition: 'width 0.4s ease' }}></div>
+                          </div>
+                        </div>
+                      );
+                    };
+                    return (
+                      <>
+                        {renderCategoryRow("SMS / OTP Verifications", categoryStats.otp, "#2271b1")}
+                        {renderCategoryRow("eSIM Travel Packages", categoryStats.esim, "#00b4d8")}
+                        {renderCategoryRow("SMM Reseller Boost Tasks", categoryStats.smm, "#7952cc")}
+                        {renderCategoryRow("Account Subscriptions", categoryStats.subs, "#1d2327")}
+                        {renderCategoryRow("Other Services", categoryStats.other, "#a7aaad")}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* VIP Customer Rankings */}
+              <div className="wp-metabox" style={{ marginBottom: 0 }}>
+                <div className="wp-metabox-header">
+                  <h2>Top Client Balances (VIPs)</h2>
+                  <button 
+                    type="button" 
+                    className="wp-button-secondary" 
+                    style={{ height: '26px', fontSize: '11px', padding: '0 8px' }}
+                    onClick={() => setAdminTab('users')}
+                  >
+                    View Users ({allUsers.length}) <ArrowRight size={12} style={{ marginLeft: '4px' }} />
+                  </button>
+                </div>
+                <div className="wp-metabox-content" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px 15px' }}>
+                  {[...allUsers]
+                    .sort((a, b) => b.wallet_balance - a.wallet_balance)
+                    .slice(0, 5)
+                    .map((cust, idx) => {
+                      const cleanName = cust.full_name.replace(/\([^)]*\)/g, '').trim();
+                      const initials = getInitials(cust.full_name);
+                      return (
+                        <div 
+                          key={cust.id} 
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between', 
+                            padding: '8px 10px',
+                            background: '#f9fafb',
+                            border: '1px solid #f1f5f9',
+                            borderRadius: '6px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="wp-user-avatar" style={{ width: '28px', height: '28px', fontSize: '11px' }}>
+                              {initials}
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '13px', fontWeight: '600', color: '#1d2327' }}>{cleanName}</div>
+                              <div style={{ fontSize: '11px', color: '#646970' }}>{cust.email || cust.phone}</div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontWeight: '700', color: '#2271b1', fontSize: '13px' }}>{formatCost(cust.wallet_balance)}</span>
+                            <button
+                              type="button"
+                              className="wp-button-secondary"
+                              style={{ height: '24px', fontSize: '10px', padding: '0 6px' }}
+                              onClick={() => handleOpenEditModal(cust)}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+
+            </div>
 
           </div>
         )}
@@ -1428,7 +1974,7 @@ const AdminDashboard = () => {
                   </button>
                 </div>
 
-                <button type="button" className="wp-button-secondary" style={{ height: '36px', borderRadius: '8px' }} onClick={fetchAdminData} disabled={isLoadingDb}>
+                <button type="button" className="wp-button-secondary" style={{ height: '36px', borderRadius: '8px' }} onClick={() => fetchAdminData(true)} disabled={isLoadingDb}>
                   <RefreshCw size={12} className={isLoadingDb ? 'spin-slow' : ''} style={{ marginRight: '6px' }} /> Refresh
                 </button>
               </div>
@@ -1465,7 +2011,12 @@ const AdminDashboard = () => {
                         : `@${(u.full_name || '').toLowerCase().replace(/\([^)]*\)/g, '').trim().replace(/\s+/g, '_')}_${u.id.slice(0, 4)}`;
 
                       return (
-                        <tr key={u.id}>
+                        <tr 
+                          key={u.id} 
+                          style={{ cursor: 'pointer', transition: 'background 0.15s ease' }} 
+                          onClick={() => handleOpenEditModal(u, 'overview')}
+                          title="Click to view user history, orders & details"
+                        >
                           <td>
                             <div className="wp-user-member-cell">
                               <div className="wp-user-avatar">
@@ -1513,8 +2064,11 @@ const AdminDashboard = () => {
                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
                               <button 
                                 className="wp-user-action-btn-circle" 
-                                title="View User"
-                                onClick={() => handleOpenEditModal(u)}
+                                title="View User History & Details"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEditModal(u, 'overview');
+                                }}
                               >
                                 <Eye size={12} />
                               </button>
@@ -1522,11 +2076,9 @@ const AdminDashboard = () => {
                               <button 
                                 className="wp-user-action-adjust-pill" 
                                 title="Adjust Balance"
-                                onClick={() => {
-                                  setSelectedUser(u);
-                                  setAdjustType('set');
-                                  setAdjustAmount('');
-                                  setIsUserModalOpen(true);
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEditModal(u, 'adjust');
                                 }}
                               >
                                 <Wallet size={10} />
@@ -1536,7 +2088,10 @@ const AdminDashboard = () => {
                               <button 
                                 className={`wp-user-action-verify-pill ${isVerified ? 'active' : ''}`}
                                 title={isVerified ? "Unverify User" : "Verify User"}
-                                onClick={() => handleToggleVerify(u.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleVerify(u.id);
+                                }}
                               >
                                 <UserCheck size={10} />
                                 VERIFY
@@ -1545,7 +2100,10 @@ const AdminDashboard = () => {
                               <button 
                                 className={`wp-user-action-restrict-pill ${isRestricted ? 'active' : ''}`}
                                 title={isRestricted ? "Remove restriction" : "Restrict User"}
-                                onClick={() => handleToggleRestrict(u.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleRestrict(u.id);
+                                }}
                               >
                                 <Ban size={10} />
                                 RESTRICT
@@ -1570,7 +2128,7 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* USER EDIT MODAL (WP STYLE) */}
+        {/* USER DETAIL & HISTORY INSPECTOR MODAL (WP STYLE) */}
         {isUserModalOpen && selectedUser && (
           <div style={{
             position: 'fixed',
@@ -1578,110 +2136,482 @@ const AdminDashboard = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(2px)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 1000,
-            padding: '20px'
+            padding: isMobile ? '10px' : '20px'
           }} onClick={() => setIsUserModalOpen(false)}>
             <div className="wp-metabox" style={{
               width: '100%',
-              maxWidth: '500px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
+              maxWidth: '780px',
+              maxHeight: '92vh',
+              display: 'flex',
+              flexDirection: 'column',
               background: '#fff',
               border: '1px solid #ccd0d4',
-              boxShadow: '0 5px 15px rgba(0,0,0,.7)'
+              borderRadius: '8px',
+              boxShadow: '0 10px 25px rgba(0,0,0,.25)',
+              overflow: 'hidden'
             }} onClick={(e) => e.stopPropagation()}>
               
-              <div className="wp-metabox-header">
-                <h2>Manage User: {selectedUser.email}</h2>
-                <button onClick={() => setIsUserModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>&times;</button>
-              </div>
-
-              <div className="wp-metabox-content" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                
-                {/* User quick metrics */}
-                <div style={{ background: '#f6f7f7', border: '1px solid #ccd0d4', padding: '12px' }}>
-                  <div style={{ fontSize: '12px', color: '#646970' }}>Current Balance</div>
-                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2271b1', marginTop: '2px' }}>{formatCost(selectedUser.wallet_balance)}</div>
+              {/* Modal Header with User Identity */}
+              <div style={{ 
+                padding: '16px 20px', 
+                borderBottom: '1px solid #e2e8f0', 
+                background: '#f8fafc',
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="wp-user-avatar" style={{ width: '42px', height: '42px', fontSize: '15px' }}>
+                    {getInitials(selectedUser.full_name)}
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <h2 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
+                        {selectedUser.full_name}
+                      </h2>
+                      {verifiedUserIds.includes(selectedUser.id) && (
+                        <span style={{ fontSize: '10px', background: '#dcfce7', color: '#15803d', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                          VERIFIED
+                        </span>
+                      )}
+                      {restrictedUserIds.includes(selectedUser.id) && (
+                        <span style={{ fontSize: '10px', background: '#fee2e2', color: '#b91c1c', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
+                          RESTRICTED
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                      {selectedUser.email} • {selectedUser.phone !== 'N/A' ? selectedUser.phone : 'No phone'}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Edit Profile Form */}
-                <form onSubmit={handleSaveProfileDetails} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <h3 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 5px 0', borderBottom: '1px solid #ccd0d4', paddingBottom: '3px' }}>Profile Details</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div>
-                      <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Full Name</label>
-                      <input type="text" className="wp-input" value={editFullName} onChange={(e) => setEditFullName(e.target.value)} required />
-                    </div>
-                    <div>
-                      <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Username</label>
-                      <input type="text" className="wp-input" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
-                    </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '600' }}>Current Wallet</div>
+                    <div style={{ fontSize: '18px', fontWeight: '800', color: '#0284c7' }}>{formatCost(selectedUser.wallet_balance)}</div>
                   </div>
-                  <div>
-                    <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Phone Number</label>
-                    <input type="text" className="wp-input" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '5px' }}>
-                    <input type="checkbox" id="wp-is-admin" checked={editIsAdmin} onChange={(e) => setEditIsAdmin(e.target.checked)} style={{ cursor: 'pointer' }} />
-                    <label htmlFor="wp-is-admin" style={{ fontSize: '12px', cursor: 'pointer' }}>Administrator Role</label>
-                  </div>
-                  {editProfileResult && (
-                    <div className={`wp-notice ${editProfileResult.includes('success') ? 'wp-notice-success' : 'wp-notice-error'}`}>
-                      <p>{editProfileResult}</p>
-                    </div>
-                  )}
-                  <button type="submit" className="wp-button-primary" style={{ marginTop: '5px' }}>Save Profile Changes</button>
-                </form>
+                  <button 
+                    onClick={() => setIsUserModalOpen(false)} 
+                    style={{ 
+                      background: '#e2e8f0', 
+                      border: 'none', 
+                      borderRadius: '50%', 
+                      width: '28px', 
+                      height: '28px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      cursor: 'pointer', 
+                      fontSize: '16px', 
+                      fontWeight: 'bold',
+                      color: '#475569'
+                    }}
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
 
-                {/* Adjust Wallet Balance */}
-                <form onSubmit={handleUserBalanceAdjust} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid #ccd0d4', paddingTop: '15px' }}>
-                  <h3 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 5px 0', borderBottom: '1px solid #ccd0d4', paddingBottom: '3px' }}>Adjust Balance</h3>
-                  <div>
-                    <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Type</label>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      {[['set', 'Set'], ['add', 'Add'], ['deduct', 'Deduct']].map(([type, label]) => (
+              {/* Modal Sub-Navigation Bar */}
+              <div style={{ 
+                display: 'flex', 
+                borderBottom: '1px solid #e2e8f0', 
+                background: '#fff',
+                overflowX: 'auto',
+                padding: '0 10px'
+              }}>
+                {[
+                  ['overview', '👤 Profile & Overview'],
+                  ['transactions', `💳 Transactions (${userTransactions.length})`],
+                  ['otp', `📱 OTP Orders (${userOtpOrders.length})`],
+                  ['tickets', `🎧 Support (${userTickets.length})`],
+                  ['adjust', '💰 Wallet Operations']
+                ].map(([tabKey, label]) => (
+                  <button
+                    key={tabKey}
+                    type="button"
+                    onClick={() => setUserModalTab(tabKey)}
+                    style={{
+                      padding: '12px 14px',
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: userModalTab === tabKey ? '3px solid #2271b1' : '3px solid transparent',
+                      color: userModalTab === tabKey ? '#2271b1' : '#64748b',
+                      fontWeight: userModalTab === tabKey ? '700' : '500',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Modal Body Container */}
+              <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+                
+                {/* 1. OVERVIEW & PROFILE TAB */}
+                {userModalTab === 'overview' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    
+                    {/* User Lifetime Metrics Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '10px' }}>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>Wallet Balance</div>
+                        <div style={{ fontSize: '16px', fontWeight: '800', color: '#0284c7', marginTop: '2px' }}>{formatCost(selectedUser.wallet_balance)}</div>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>Total Deposited</div>
+                        <div style={{ fontSize: '16px', fontWeight: '800', color: '#00a32a', marginTop: '2px' }}>{formatCost(userLifetimeDeposited)}</div>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>Total Spent</div>
+                        <div style={{ fontSize: '16px', fontWeight: '800', color: '#d63638', marginTop: '2px' }}>{formatCost(userLifetimeSpent)}</div>
+                      </div>
+                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px' }}>
+                        <div style={{ fontSize: '11px', color: '#64748b' }}>OTP Orders Count</div>
+                        <div style={{ fontSize: '16px', fontWeight: '800', color: '#7952cc', marginTop: '2px' }}>{userOtpOrders.length} orders</div>
+                      </div>
+                    </div>
+
+                    {/* Account Identity Metadata */}
+                    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '14px', borderRadius: '6px' }}>
+                      <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#1e293b', fontWeight: '700' }}>Account Identity Details</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '10px', fontSize: '12px' }}>
+                        <div><strong style={{ color: '#475569' }}>User ID:</strong> <code style={{ fontSize: '11px', background: '#e2e8f0', padding: '2px 4px', borderRadius: '3px' }}>{selectedUser.id}</code></div>
+                        <div><strong style={{ color: '#475569' }}>Registered:</strong> {new Date(selectedUser.created_at).toLocaleString()}</div>
+                        <div><strong style={{ color: '#475569' }}>Email:</strong> {selectedUser.email}</div>
+                        <div><strong style={{ color: '#475569' }}>Phone:</strong> {selectedUser.phone}</div>
+                      </div>
+
+                      {/* Quick Moderation Toggles */}
+                      <div style={{ display: 'flex', gap: '10px', marginTop: '12px', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
                         <button
-                          key={type}
                           type="button"
-                          className={adjustType === type ? 'wp-button-primary' : 'wp-button-secondary'}
-                          style={{ flex: 1, height: '26px', fontSize: '12px' }}
-                          onClick={() => setAdjustType(type)}
+                          className={`wp-button-secondary ${verifiedUserIds.includes(selectedUser.id) ? 'active' : ''}`}
+                          style={{ fontSize: '12px', height: '28px' }}
+                          onClick={() => handleToggleVerify(selectedUser.id)}
                         >
-                          {label}
+                          <UserCheck size={14} style={{ marginRight: '4px' }} />
+                          {verifiedUserIds.includes(selectedUser.id) ? 'Remove Verification' : 'Mark as Verified'}
                         </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Amount (₦)</label>
-                    <input type="number" className="wp-input" placeholder="Amount" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required />
-                  </div>
-                  {adjustResult && (
-                    <div className="wp-notice wp-notice-info">
-                      <p>{adjustResult}</p>
-                    </div>
-                  )}
-                  <button type="submit" className="wp-button-primary" style={{ background: '#d63638', borderColor: '#d63638' }}>Save Wallet Change</button>
-                </form>
 
-                {/* Webhook deposit simulator */}
-                <form onSubmit={handleSimulateWebhookDeposit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', borderTop: '1px solid #ccd0d4', paddingTop: '15px' }}>
-                  <h3 style={{ fontSize: '13px', fontWeight: '600', margin: '0 0 5px 0', borderBottom: '1px solid #ccd0d4', paddingBottom: '3px' }}>Simulate Deposit Webhook</h3>
-                  <div>
-                    <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px' }}>Amount (₦)</label>
-                    <input type="number" className="wp-input" value={simDepositAmount} onChange={(e) => setSimDepositAmount(Number(e.target.value))} required />
-                  </div>
-                  {simDepositSuccess && (
-                    <div className="wp-notice wp-notice-success">
-                      <p>webhook deposit simulated successfully.</p>
+                        <button
+                          type="button"
+                          className="wp-button-secondary"
+                          style={{ fontSize: '12px', height: '28px', color: restrictedUserIds.includes(selectedUser.id) ? '#15803d' : '#b91c1c' }}
+                          onClick={() => handleToggleRestrict(selectedUser.id)}
+                        >
+                          <Ban size={14} style={{ marginRight: '4px' }} />
+                          {restrictedUserIds.includes(selectedUser.id) ? 'Unrestrict Account' : 'Restrict Account'}
+                        </button>
+                      </div>
                     </div>
-                  )}
-                  <button type="submit" className="wp-button-secondary" onClick={() => setSimDepositSuccess(false)}>Trigger Webhook Deposit</button>
-                </form>
+
+                    {/* Edit Profile Form */}
+                    <form onSubmit={handleSaveProfileDetails} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <h4 style={{ margin: '0', fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>Edit User Profile</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
+                        <div>
+                          <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Full Name</label>
+                          <input type="text" className="wp-input" value={editFullName} onChange={(e) => setEditFullName(e.target.value)} required />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Username</label>
+                          <input type="text" className="wp-input" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Phone Number</label>
+                        <input type="text" className="wp-input" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input type="checkbox" id="wp-is-admin-inspect" checked={editIsAdmin} onChange={(e) => setEditIsAdmin(e.target.checked)} style={{ cursor: 'pointer' }} />
+                        <label htmlFor="wp-is-admin-inspect" style={{ fontSize: '12px', cursor: 'pointer', fontWeight: '600' }}>Administrator Access Privileges</label>
+                      </div>
+                      {editProfileResult && (
+                        <div className={`wp-notice ${editProfileResult.includes('success') ? 'wp-notice-success' : 'wp-notice-error'}`}>
+                          <p>{editProfileResult}</p>
+                        </div>
+                      )}
+                      <button type="submit" className="wp-button-primary" style={{ alignSelf: 'flex-start' }}>Save Profile Changes</button>
+                    </form>
+                  </div>
+                )}
+
+                {/* 2. TRANSACTIONS TAB */}
+                {userModalTab === 'transactions' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                        Transaction History ({userTransactions.length})
+                      </h4>
+                      <span style={{ fontSize: '12px', color: '#64748b' }}>
+                        Lifetime Deposited: <strong style={{ color: '#00a32a' }}>{formatCost(userLifetimeDeposited)}</strong>
+                      </span>
+                    </div>
+
+                    {userTransactions.length === 0 ? (
+                      <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '6px', color: '#64748b', fontSize: '13px' }}>
+                        No transactions recorded for this user yet.
+                      </div>
+                    ) : (
+                      <div className="wp-table-container" style={{ margin: 0 }}>
+                        <table className="wp-table" style={{ fontSize: '12px' }}>
+                          <thead>
+                            <tr>
+                              <th>DATE</th>
+                              <th>TYPE</th>
+                              <th>METHOD / DESC</th>
+                              <th>AMOUNT (₦)</th>
+                              <th>STATUS</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userTransactions.map((tx) => {
+                              const isDeposit = tx.type === 'Deposit';
+                              return (
+                                <tr key={tx.id}>
+                                  <td>{tx.date || new Date(tx.created_at).toLocaleString()}</td>
+                                  <td>
+                                    <span style={{
+                                      fontSize: '10px',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontWeight: '700',
+                                      background: isDeposit ? 'rgba(0, 163, 42, 0.1)' : 'rgba(34, 113, 177, 0.1)',
+                                      color: isDeposit ? '#00a32a' : '#2271b1'
+                                    }}>
+                                      {tx.type}
+                                    </span>
+                                  </td>
+                                  <td>{tx.method}</td>
+                                  <td style={{ fontWeight: '700', color: isDeposit ? '#00a32a' : '#1e293b' }}>
+                                    {isDeposit ? '+' : '-'}{formatCost(tx.amountNgn || tx.amount || 0)}
+                                  </td>
+                                  <td>
+                                    <span style={{
+                                      fontSize: '10px',
+                                      padding: '1px 6px',
+                                      borderRadius: '4px',
+                                      fontWeight: '600',
+                                      background: tx.status === 'SUCCESS' ? 'rgba(0, 163, 42, 0.1)' : '#fee2e2',
+                                      color: tx.status === 'SUCCESS' ? '#00a32a' : '#dc2626'
+                                    }}>
+                                      {tx.status || 'SUCCESS'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. OTP ORDERS TAB */}
+                {userModalTab === 'otp' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                        OTP Verification Orders ({userOtpOrders.length})
+                      </h4>
+                    </div>
+
+                    {userOtpOrders.length === 0 ? (
+                      <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '6px', color: '#64748b', fontSize: '13px' }}>
+                        No OTP verification orders found for this user.
+                      </div>
+                    ) : (
+                      <div className="wp-table-container" style={{ margin: 0 }}>
+                        <table className="wp-table" style={{ fontSize: '12px' }}>
+                          <thead>
+                            <tr>
+                              <th>DATE</th>
+                              <th>SERVICE</th>
+                              <th>PHONE NUMBER</th>
+                              <th>PRICE (₦)</th>
+                              <th>OTP CODE</th>
+                              <th>STATUS</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {userOtpOrders.map((order) => {
+                              const isCompleted = order.status === 'COMPLETED' || order.status === 'SUCCESS';
+                              return (
+                                <tr key={order.id}>
+                                  <td>{new Date(order.created_at).toLocaleString()}</td>
+                                  <td><strong>{order.service}</strong> ({order.server || 'Server 2'})</td>
+                                  <td><code>{order.phone_number}</code></td>
+                                  <td>{formatCost(order.price_ngn)}</td>
+                                  <td>
+                                    {order.otp_code ? (
+                                      <span style={{ fontWeight: '800', background: '#ecfdf5', color: '#059669', padding: '2px 6px', borderRadius: '4px', letterSpacing: '1px' }}>
+                                        {order.otp_code}
+                                      </span>
+                                    ) : (
+                                      <span style={{ color: '#94a3b8' }}>Waiting...</span>
+                                    )}
+                                  </td>
+                                  <td>
+                                    <span style={{
+                                      fontSize: '10px',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontWeight: '700',
+                                      background: isCompleted ? '#dcfce7' : order.status === 'CANCELLED' ? '#fee2e2' : '#fef3c7',
+                                      color: isCompleted ? '#15803d' : order.status === 'CANCELLED' ? '#b91c1c' : '#b45309'
+                                    }}>
+                                      {order.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 4. SUPPORT TICKETS TAB */}
+                {userModalTab === 'tickets' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
+                        Support Desk Tickets ({userTickets.length})
+                      </h4>
+                    </div>
+
+                    {userTickets.length === 0 ? (
+                      <div style={{ padding: '30px', textAlign: 'center', background: '#f8fafc', borderRadius: '6px', color: '#64748b', fontSize: '13px' }}>
+                        No support tickets opened by this user.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {userTickets.map((t) => (
+                          <div key={t.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px', borderRadius: '6px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{
+                                  fontSize: '10px',
+                                  fontWeight: '700',
+                                  padding: '1px 6px',
+                                  borderRadius: '4px',
+                                  background: t.status === 'OPEN' ? '#fee2e2' : t.status === 'RESOLVED' ? '#dcfce7' : '#fef3c7',
+                                  color: t.status === 'OPEN' ? '#b91c1c' : t.status === 'RESOLVED' ? '#15803d' : '#b45309'
+                                }}>
+                                  {t.status}
+                                </span>
+                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>{t.category || 'Support'}</span>
+                              </div>
+                              <span style={{ fontSize: '11px', color: '#94a3b8' }}>{new Date(t.created_at).toLocaleString()}</span>
+                            </div>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#0f172a', marginBottom: '4px' }}>
+                              {t.subject || 'Inquiry'}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#475569', background: '#fff', padding: '8px', border: '1px solid #e2e8f0', borderRadius: '4px' }}>
+                              {t.message}
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                              {t.status !== 'RESOLVED' && (
+                                <button
+                                  type="button"
+                                  className="wp-button-secondary"
+                                  style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
+                                  onClick={() => handleUpdateTicketStatus(t.id, 'RESOLVED')}
+                                >
+                                  Mark as Resolved
+                                </button>
+                              )}
+                              {t.status !== 'IN_PROGRESS' && t.status !== 'RESOLVED' && (
+                                <button
+                                  type="button"
+                                  className="wp-button-secondary"
+                                  style={{ height: '24px', fontSize: '11px', padding: '0 8px' }}
+                                  onClick={() => handleUpdateTicketStatus(t.id, 'IN_PROGRESS')}
+                                >
+                                  Mark In Progress
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 5. WALLET OPERATIONS TAB */}
+                {userModalTab === 'adjust' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    
+                    {/* Direct Wallet Balance Adjustment */}
+                    <form onSubmit={handleUserBalanceAdjust} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#f8fafc', padding: '16px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Direct Balance Override / Adjustment</h4>
+                      <div>
+                        <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Operation Type</label>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          {[['set', 'Set Exact Balance'], ['add', 'Add Funds (+)'], ['deduct', 'Deduct Funds (-)']].map(([type, label]) => (
+                            <button
+                              key={type}
+                              type="button"
+                              className={adjustType === type ? 'wp-button-primary' : 'wp-button-secondary'}
+                              style={{ flex: 1, height: '30px', fontSize: '12px' }}
+                              onClick={() => setAdjustType(type)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Amount in Naira (₦)</label>
+                        <input type="number" className="wp-input" placeholder="Amount (e.g. 5000)" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} required />
+                      </div>
+                      {adjustResult && (
+                        <div className="wp-notice wp-notice-info">
+                          <p>{adjustResult}</p>
+                        </div>
+                      )}
+                      <button type="submit" className="wp-button-primary" style={{ background: '#d63638', borderColor: '#d63638', alignSelf: 'flex-start' }}>
+                        Apply Wallet Adjustment
+                      </button>
+                    </form>
+
+                    {/* Simulate Webhook Deposit */}
+                    <form onSubmit={handleSimulateWebhookDeposit} style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#f8fafc', padding: '16px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                      <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>Simulate Gateway Webhook Inflow (PocketFi)</h4>
+                      <div>
+                        <label style={{ fontSize: '12px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Simulated Deposit Amount (₦)</label>
+                        <input type="number" className="wp-input" value={simDepositAmount} onChange={(e) => setSimDepositAmount(Number(e.target.value))} required />
+                      </div>
+                      {simDepositSuccess && (
+                        <div className="wp-notice wp-notice-success">
+                          <p>PocketFi Webhook deposit simulated successfully! Balance updated.</p>
+                        </div>
+                      )}
+                      <button type="submit" className="wp-button-secondary" onClick={() => setSimDepositSuccess(false)} style={{ alignSelf: 'flex-start' }}>
+                        Trigger Webhook Deposit
+                      </button>
+                    </form>
+
+                  </div>
+                )}
 
               </div>
             </div>

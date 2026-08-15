@@ -542,7 +542,7 @@ export const AppProvider = ({ children }) => {
         if (!isMounted) return;
         if (session) {
           setIsLoggedIn(true);
-          setUser(session.user);
+          setUser(prevUser => (prevUser?.id === session.user.id ? prevUser : session.user));
           if (identifiedUserId.current !== session.user.id) {
             posthog.identify(session.user.id, {
               email: session.user.email,
@@ -585,7 +585,7 @@ export const AppProvider = ({ children }) => {
           identifiedUserId.current = authenticatedUser.id;
         }
         setIsLoggedIn(true);
-        setUser(authenticatedUser);
+        setUser(prevUser => (prevUser?.id === authenticatedUser.id ? prevUser : authenticatedUser));
       } else {
         if (identifiedUserId.current) {
           posthog.reset();
@@ -678,8 +678,10 @@ export const AppProvider = ({ children }) => {
       return;
     }
 
-    // Ensure loader spinner remains active during initial DB sync
-    setIsAuthLoading(true);
+    // Ensure loader spinner only runs during initial cold start DB sync
+    if (!profile.full_name && !profile.username) {
+      setIsAuthLoading(true);
+    }
 
     // A. Fetch initial profile data (balance, full_name, phone)
     const fetchProfileData = async () => {
@@ -863,7 +865,7 @@ export const AppProvider = ({ children }) => {
       supabase.removeChannel(txChannel);
       supabase.removeChannel(walletChannel);
     };
-  }, [user]);
+  }, [user?.id]);
 
   const loginUser = (email) => {
     setIsLoggedIn(true);
@@ -2225,7 +2227,7 @@ export const AppProvider = ({ children }) => {
       fetchTextVerifiedServices();
       fetchHeroSmsCountries();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const refundOtpSession = async (otp) => {
     if (!user || otp.refunded) return;
