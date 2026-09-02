@@ -1020,11 +1020,17 @@ export const AppProvider = ({ children }) => {
             cleanOrderId = dbOtp.id.replace('hero-', '');
           }
 
-          const autoCountry = getCountryFromNumber(dbOtp.phone_number);
+          const rawPhone = String(dbOtp.phone_number || '').trim();
+          const cleanDigits = rawPhone.replace(/\D/g, '');
+          const normalizedPhone = (cleanDigits.length === 10 && (dbOtp.server === 'server2' || dbOtp.server === 'server3'))
+            ? `+1${cleanDigits}`
+            : (rawPhone.startsWith('+') ? rawPhone : (cleanDigits ? `+${cleanDigits}` : rawPhone));
+
+          const autoCountry = getCountryFromNumber(normalizedPhone);
 
           return {
             id: dbOtp.id,
-            phoneNumber: dbOtp.phone_number,
+            phoneNumber: normalizedPhone,
             server: dbOtp.server,
             service: dbOtp.service,
             priceNgn: Number(dbOtp.price_ngn),
@@ -1032,8 +1038,8 @@ export const AppProvider = ({ children }) => {
             otpCode: dbOtp.otp_code,
             smsText: dbOtp.sms_text,
             created_at: dbOtp.created_at,
-            country: autoCountry ? autoCountry.name : 'Unknown',
-            flag: autoCountry ? autoCountry.flag : '🏳️',
+            country: autoCountry ? autoCountry.name : (dbOtp.server === 'server3' ? 'United States' : 'Unknown'),
+            flag: autoCountry ? autoCountry.flag : (dbOtp.server === 'server3' ? '🇺🇸' : '🏳️'),
             fivesimOrderId: dbOtp.server === 'server1' ? Number(cleanOrderId) : null,
             orderId: cleanOrderId,
             expiresAt: createdTime + 15 * 60 * 1000
@@ -1422,8 +1428,9 @@ export const AppProvider = ({ children }) => {
         }
 
         const detail = data.data;
-        const phone = detail.number;
-        const formattedPhone = String(phone).startsWith('+') ? String(phone) : '+' + phone;
+        const rawPhone = String(detail.number || detail.phone || '').trim();
+        const cleanDigits = rawPhone.replace(/\D/g, '');
+        const formattedPhone = cleanDigits.length === 10 ? `+1${cleanDigits}` : (rawPhone.startsWith('+') ? rawPhone : `+${cleanDigits}`);
 
         const autoCountry = getCountryFromNumber(formattedPhone);
 
@@ -1540,9 +1547,12 @@ export const AppProvider = ({ children }) => {
           throw new Error(error ? error.message : (data?.data?.message || 'Failed to order from Server 2'));
         }
 
-        // data.data has { order_id, phonenumber, number, ... }
+        // data.data has { order_id, phonenumber, number, cc, cc_and_number, ... }
         const orderData = data.data;
-        const phone = orderData.phonenumber || orderData.number || orderData.cc_and_number;
+        const phone = orderData.cc_and_number 
+          || (orderData.cc && (orderData.phonenumber || orderData.number) ? `${orderData.cc}${orderData.phonenumber || orderData.number}` : null)
+          || orderData.phonenumber 
+          || orderData.number;
         const formattedPhone = String(phone).startsWith('+') ? String(phone) : '+' + phone;
 
         const autoCountry = getCountryFromNumber(formattedPhone);
@@ -1772,7 +1782,9 @@ export const AppProvider = ({ children }) => {
       }
 
       const resData = data.data; // Textverified verification object
-      const formattedPhone = String(resData.number).startsWith('+') ? String(resData.number) : '+' + resData.number;
+      const rawResPhone = String(resData.number || resData.phone || '').trim();
+      const cleanDigits = rawResPhone.replace(/\D/g, '');
+      const formattedPhone = cleanDigits.length === 10 ? `+1${cleanDigits}` : (rawResPhone.startsWith('+') ? rawResPhone : `+${cleanDigits}`);
       const autoCountry = getCountryFromNumber(formattedPhone);
 
       const newOtp = {
@@ -1845,7 +1857,10 @@ export const AppProvider = ({ children }) => {
         }
 
         const orderData = data.data; // sms pool response
-        const rawNum = orderData.phonenumber || orderData.number;
+        const rawNum = orderData.cc_and_number 
+          || (orderData.cc && (orderData.phonenumber || orderData.number) ? `${orderData.cc}${orderData.phonenumber || orderData.number}` : null)
+          || orderData.phonenumber 
+          || orderData.number;
         const formattedPhone = String(rawNum).startsWith('+') ? String(rawNum) : '+' + rawNum;
 
         const newRental = {

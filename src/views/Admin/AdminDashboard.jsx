@@ -2806,9 +2806,19 @@ const AdminDashboard = () => {
                             </td>
                             <td>{new Date(order.created_at).toLocaleString()}</td>
                             <td>{serverNames[order.server] || order.server}</td>
-                            <td style={{ fontWeight: '600' }}>{order.service}</td>
-                            <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>{order.phone_number}</td>
-                            <td style={{ fontWeight: 'bold' }}>{formatCost(order.price_ngn)}</td>
+                            <td style={{ fontFamily: 'monospace', fontWeight: 'bold' }}>
+                              {(() => {
+                                const raw = String(order.phone_number || '').trim();
+                                const digits = raw.replace(/\D/g, '');
+                                if ((order.server === 'server2' || order.server === 'server3') && digits.length === 10) {
+                                  return `+1 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
+                                }
+                                if (digits.length === 11 && digits.startsWith('1')) {
+                                  return `+1 ${digits.slice(1, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+                                }
+                                return raw.startsWith('+') ? raw : (digits ? `+${digits}` : '-');
+                              })()}
+                            </td>
                             <td style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#00a32a', fontSize: '14px' }}>
                               {order.otp_code || '-'}
                             </td>
