@@ -3,10 +3,11 @@ import { createPortal } from 'react-dom';
 import { AppContext } from '../../context/AppContext';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import posthog from '../../posthog';
-import { CreditCard, Landmark, Coins, AlertCircle, Check, Copy, Wallet2, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { CreditCard, Landmark, Coins, AlertCircle, Check, Copy, Wallet2, ArrowDownCircle, ArrowUpCircle, Phone, ShieldCheck } from 'lucide-react';
 
 const Wallet = () => {
   const { 
+    profile,
     walletBalance, 
     currency, 
     transactions, 
@@ -23,10 +24,18 @@ const Wallet = () => {
 
   const [depositTab, setDepositTab] = useState('pocketfi'); // pocketfi, crypto
   const [selectedBank, setSelectedBank] = useState('paga');
+  const [phoneNumber, setPhoneNumber] = useState(profile?.phone || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [simulationAmount, setSimulationAmount] = useState(2250);
   const [simulationLoading, setSimulationLoading] = useState(false);
   const [simulationSuccess, setSimulationSuccess] = useState(false);
+
+  // Sync profile phone if updated
+  React.useEffect(() => {
+    if (profile?.phone && !phoneNumber) {
+      setPhoneNumber(profile.phone);
+    }
+  }, [profile?.phone]);
 
   const [cryptoAmount, setCryptoAmount] = useState(10);
   const [selectedCryptoChannel, setSelectedCryptoChannel] = useState('binance'); // binance, bybit
@@ -37,9 +46,16 @@ const Wallet = () => {
 
   const handleGenerateWallet = async (e) => {
     e.preventDefault();
-    setIsGenerating(true);
     setGenerationError('');
-    const result = await generatePocketFiWallet(selectedBank);
+
+    const clean = phoneNumber.trim().replace(/\D/g, '');
+    if (!clean || clean.length < 10) {
+      setGenerationError("A valid phone number (at least 10-11 digits) is required by banking regulations to generate your virtual account.");
+      return;
+    }
+
+    setIsGenerating(true);
+    const result = await generatePocketFiWallet(selectedBank, phoneNumber);
     setIsGenerating(false);
     if (result && !result.success) {
       setGenerationError(result.msg || "Failed to generate virtual wallet account.");
@@ -189,6 +205,34 @@ const Wallet = () => {
                       <span>{generationError}</span>
                     </div>
                   )}
+
+                  {/* Phone Number Field */}
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label className="form-label" htmlFor="pocketfi-phone-input" style={{ marginBottom: 0 }}>
+                        Phone Number <span style={{ color: 'var(--color-red)' }}>*</span>
+                      </label>
+                      <span style={{ fontSize: '11px', color: 'var(--color-turquoise)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <ShieldCheck size={12} /> Required by Central Bank
+                      </span>
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <Phone size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                      <input
+                        id="pocketfi-phone-input"
+                        type="tel"
+                        className="form-input"
+                        placeholder="e.g. 08012345678 or +234..."
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        required
+                        style={{ width: '100%', paddingLeft: '38px' }}
+                      />
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                      Your phone number is linked to your dedicated virtual account and saved to your profile.
+                    </div>
+                  </div>
 
                   <div>
                     <label className="form-label" htmlFor="pocketfi-bank-select">Select Funding Bank Partner</label>

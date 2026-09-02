@@ -1190,21 +1190,21 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const generatePocketFiWallet = async (bank = 'paga') => {
+  const generatePocketFiWallet = async (bank = 'paga', inputPhone = null) => {
     if (!user) return { success: false, msg: 'Please log in first' };
 
     try {
       // Fetch user profile to verify phone normalization
-      const { data: profile, error: profileErr } = await supabase
+      const { data: currentProfile, error: profileErr } = await supabase
         .from('profiles')
-        .select('phone')
+        .select('phone, full_name')
         .eq('id', user.id)
         .single();
 
       if (profileErr) throw new Error("Could not load user profile: " + profileErr.message);
 
-      let currentPhone = profile.phone || '';
-      let normalizedPhone = currentPhone.replace(/\D/g, '');
+      let phoneToUse = (inputPhone || currentProfile?.phone || '').trim();
+      let normalizedPhone = phoneToUse.replace(/\D/g, '');
       if (normalizedPhone.startsWith('234') && normalizedPhone.length === 13) {
         normalizedPhone = '0' + normalizedPhone.substring(3);
       }
@@ -1212,16 +1212,22 @@ export const AppProvider = ({ children }) => {
         normalizedPhone = '0' + normalizedPhone;
       }
 
-      if (normalizedPhone !== currentPhone) {
+      if (!normalizedPhone || normalizedPhone.length < 10) {
+        return { success: false, msg: 'Please provide a valid phone number (e.g. 08012345678) to generate your dedicated bank account.' };
+      }
+
+      if (normalizedPhone !== currentProfile?.phone) {
         const { error: updateErr } = await supabase
           .from('profiles')
           .update({ phone: normalizedPhone })
           .eq('id', user.id);
         if (updateErr) throw new Error("Could not update profile phone: " + updateErr.message);
+        
+        setProfile(prev => prev ? ({ ...prev, phone: normalizedPhone }) : prev);
       }
 
       const { data, error } = await supabase.functions.invoke('pocketfi-create-wallet', {
-        body: { bank }
+        body: { bank, phone: normalizedPhone }
       });
 
       if (!error && data && data.status) {
@@ -1230,6 +1236,9 @@ export const AppProvider = ({ children }) => {
       }
       
       if (error) throw error;
+      if (data && !data.status) {
+        throw new Error(data.message || 'Failed to create virtual wallet with PocketFi');
+      }
       
     } catch (e) {
       console.error("PocketFi API Error:", e);

@@ -50,16 +50,25 @@ serve(async (req) => {
 
     const email = user.email || 'customer@discountzar.ng'
     
-    // Normalize phone number to exactly 11 digits (e.g. 08012345678)
-    let phone = (profile.phone || '').replace(/\D/g, '')
+    // Normalize phone number to 11 digits (e.g. 08012345678)
+    const rawPhone = (requestBody.phone || profile.phone || '').trim()
+    let phone = rawPhone.replace(/\D/g, '')
     if (phone.startsWith('234') && phone.length === 13) {
       phone = '0' + phone.substring(3)
     }
     if (phone.length === 10 && !phone.startsWith('0')) {
       phone = '0' + phone
     }
-    if (phone.length !== 11) {
-      phone = '08000000000'
+    if (!phone || phone.length < 10) {
+      throw new Error('A valid phone number (at least 10-11 digits) is required to generate a dedicated bank account.')
+    }
+
+    // Persist phone to profile if it wasn't set or changed
+    if (!profile.phone || profile.phone !== phone) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ phone })
+        .eq('id', user.id)
     }
 
     const fullName = profile.full_name || 'Valued Customer'
